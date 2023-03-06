@@ -38,5 +38,13 @@ namespace EmergencySituations.Controllers
             var result = MyDataBase.DeleteRow("Користувачі", id);
             return result ? Ok() : Problem("Error");
         }
+
+        [HttpPut("{id}")]
+        public IActionResult Put(object json, int id)
+        {
+            Console.WriteLine(json);
+            var result = MyDataBase.UpdateRow("Користувачі", json, id);
+            return result ? Ok() : Problem("Error");
+        }
     }
 }

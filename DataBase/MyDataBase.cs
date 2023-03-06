@@ -43,7 +43,32 @@ namespace EmergencySituations.DataBase
             var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json.ToString());
 
             string q = $"INSERT INTO [{tableName}] ({String.Join(", ", data.Keys.ToArray())}) VALUES (@{String.Join(", @", data.Keys.ToArray())})";
+            return RowAction(data, q);
+        }
 
+        public static bool UpdateRow(string tableName, object json, int id)
+        {
+            var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json.ToString());
+            foreach (var pair in data)
+            {
+                if (pair.Key == "Код")
+                {
+                    data.Remove(pair.Key);
+                    break;
+                }
+            }
+            var temp = new List<string>();
+            foreach (var row in data)
+            {
+                temp.Add($"[{row.Key}] = @{row.Key}");
+            }
+            string q = $"UPDATE [{tableName}] SET {String.Join(", ", temp.ToArray())} WHERE [Код] = {id}";
+            Console.WriteLine(q);
+            return RowAction(data, q);
+        }
+
+        private static bool RowAction(Dictionary<string, object> data, string q)
+        {
             try
             {
                 using (OleDbCommand cmd = new OleDbCommand(q, _conn))
@@ -56,8 +81,9 @@ namespace EmergencySituations.DataBase
                 }
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return false;
             }
         }
