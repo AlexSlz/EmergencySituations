@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EmergencySituations.Model;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Data;
 using System.Data.OleDb;
 
@@ -9,6 +9,8 @@ namespace EmergencySituations.DataBase
 {
     public static class MyDataBase
     {
+        public static MyDBContext<User> Users = new MyDBContext<User>("Користувачі");
+
         private static OleDbConnection _conn = null;
 
         public static void Connect(string fileName)
@@ -17,6 +19,7 @@ namespace EmergencySituations.DataBase
             string connString = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={filePath};Persist Security Info=False;";
             _conn = new OleDbConnection(connString);
             TryConnectToDB(_conn);
+            Users.Load();
         }
 
         public static ContentResult GetData(this ControllerBase controller, string q)
@@ -38,32 +41,24 @@ namespace EmergencySituations.DataBase
             return JsonConvert.SerializeObject(table, Formatting.Indented);
         }
 
-        public static bool AddRow(string tableName, object json)
+        public static bool AddRow(string tableName, IModel obj)
         {
-            var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json.ToString());
+            var data = obj.ToDictionary();
 
             string q = $"INSERT INTO [{tableName}] ({String.Join(", ", data.Keys.ToArray())}) VALUES (@{String.Join(", @", data.Keys.ToArray())})";
             return RowAction(data, q);
         }
 
-        public static bool UpdateRow(string tableName, object json, int id)
+        public static bool UpdateRow(string tableName, IModel obj)
         {
-            var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json.ToString());
-            foreach (var pair in data)
-            {
-                if (pair.Key == "Код")
-                {
-                    data.Remove(pair.Key);
-                    break;
-                }
-            }
+            var data = obj.ToDictionary();
+
             var temp = new List<string>();
             foreach (var row in data)
             {
                 temp.Add($"[{row.Key}] = @{row.Key}");
             }
-            string q = $"UPDATE [{tableName}] SET {String.Join(", ", temp.ToArray())} WHERE [Код] = {id}";
-            Console.WriteLine(q);
+            string q = $"UPDATE [{tableName}] SET {String.Join(", ", temp.ToArray())} WHERE [Код] = {obj.Код}";
             return RowAction(data, q);
         }
 

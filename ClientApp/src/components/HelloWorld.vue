@@ -8,19 +8,19 @@ import axios from 'axios'
   <button v-on:click="AddUser()">Add</button>
 
   <div v-for="user in users">
-    <a>{{ user.Код }}</a>
-    <input v-model="user.Логін" />
-    <p>{{ user.Пароль }}</p>
+    <a>{{ user.код }}</a>
+    <input v-model="user.логін" />
+    <p>{{ user.пароль }}</p>
     <button v-on:click="UpdateUser(user)">Update</button>
-    <button v-on:click="RemoveUser(user.Код)">Remove</button>
+    <button v-on:click="RemoveUser(user.код)">Remove</button>
   </div>
 </template>
 
 <script lang="ts">
 interface User {
-  Код: number
-  Логін: string
-  Пароль: string
+  код: number
+  логін: string
+  пароль: string
 }
 
 export default {
@@ -37,10 +37,13 @@ export default {
     GetData() {
       fetch('/api/users')
         .then((res) => res.json())
-        .then((data) => (this.users = data))
+        .then((data) => {
+          console.log(data[0].код)
+          this.users = data
+        })
     },
     AddUser() {
-      var user = { Логін: this.userName, Пароль: '123' } as User
+      var user = { логін: this.userName, пароль: '123' } as User
       axios.post('/api/users', user).then((res) => {
         console.log(res)
         this.GetData()
@@ -53,7 +56,7 @@ export default {
       })
     },
     UpdateUser(user: User) {
-      axios.put(`/api/users/${user.Код}`, user).then((res) => {
+      axios.put(`/api/users`, user).then((res) => {
         console.log(res)
         this.GetData()
       })

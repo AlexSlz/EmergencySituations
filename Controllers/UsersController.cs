@@ -1,5 +1,7 @@
 ﻿using EmergencySituations.DataBase;
+using EmergencySituations.Model;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace EmergencySituations.Controllers
 {
@@ -10,40 +12,46 @@ namespace EmergencySituations.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return this.GetData("SELECT * FROM [Користувачі]");
+            return Ok(MyDataBase.Users);
+            //return this.GetData("SELECT * FROM [Користувачі]");
         }
 
         [HttpGet("id/{id}")]
         public IActionResult Get(int id)
         {
-            return this.GetData($"SELECT * FROM [Користувачі] WHERE [Код] = {id}");
+            return Ok(MyDataBase.Users.FirstOrDefault(i => i.Код == id));
+            //return this.GetData($"SELECT * FROM [Користувачі] WHERE [Код] = {id}");
         }
 
         [HttpGet("login/{login}")]
         public IActionResult Get(string login)
         {
-            return this.GetData($"SELECT * FROM [Користувачі] WHERE [Логін] = '{login}'");
+            return Ok(MyDataBase.Users.FirstOrDefault(i => i.Логін == login));
         }
 
         [HttpPost]
-        public IActionResult Post(object json)
+        public IActionResult Post(User user)
         {
-            var result = MyDataBase.AddRow("Користувачі", json);
-            return result ? Created("/users", "ok") : Problem("Error");
+            MyDataBase.Users.Add(user);
+            MyDataBase.Users.UpdateTable();
+            //var result = MyDataBase.AddRow("Користувачі", user);
+            return Created($"/users/id/{user.Код}", user);
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var result = MyDataBase.DeleteRow("Користувачі", id);
-            return result ? Ok() : Problem("Error");
+            MyDataBase.Users.Remove(MyDataBase.Users.Find(i => i.Код == id));
+            MyDataBase.Users.UpdateTable();
+            return Ok();
+            //var result = MyDataBase.DeleteRow("Користувачі", id);
+            //return result ? Ok() : Problem("Error");
         }
 
-        [HttpPut("{id}")]
-        public IActionResult Put(object json, int id)
+        [HttpPut]
+        public IActionResult Put(User user)
         {
-            Console.WriteLine(json);
-            var result = MyDataBase.UpdateRow("Користувачі", json, id);
+            var result = MyDataBase.UpdateRow("Користувачі", user);
             return result ? Ok() : Problem("Error");
         }
     }
