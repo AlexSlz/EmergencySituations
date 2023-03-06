@@ -4,29 +4,28 @@ import axios from 'axios'
 
 <template>
   <input v-model="userName" />
-  <p>Power: {{ userPower }}</p>
-  <input v-model="userPower" type="range" min="1" max="100" />
   <br />
   <button v-on:click="AddUser()">Add</button>
 
-  <div v-for="(user, i) in users">
-    <h1>{{ user.name }}</h1>
-    <p>{{ user.power }}</p>
-    <button v-on:click="RemoveUser(i)">Remove</button>
+  <div v-for="user in users">
+    <a>{{ user.Код }}</a>
+    <h1>{{ user.Логін }}</h1>
+    <p>{{ user.Пароль }}</p>
+    <button v-on:click="RemoveUser(user.Код)">Remove</button>
   </div>
 </template>
 
 <script lang="ts">
 interface User {
-  name: string
-  power: number
+  Код: number
+  Логін: string
+  Пароль: string
 }
 
 export default {
   data() {
     return {
       userName: 'test',
-      userPower: 0,
       users: [] as User[],
     }
   },
@@ -35,20 +34,26 @@ export default {
   },
   methods: {
     GetData() {
-      fetch('/api/getUsers')
+      fetch('/api/users')
         .then((res) => res.json())
         .then((data) => (this.users = data))
     },
     AddUser() {
       axios
-        .post('/api/addUser', {
-          name: this.userName,
-          power: this.userPower,
+        .post('/api/users', {
+          Логін: this.userName,
+          Пароль: '123',
         } as User)
-        .then((res) => this.GetData())
+        .then((res) => {
+          console.log(res)
+          this.GetData()
+        })
     },
     RemoveUser(id: number) {
-      axios.delete(`/api/removeUser/${id}`).then((res) => this.GetData())
+      axios.delete(`/api/users/${id}`).then((res) => {
+        console.log(res)
+        this.GetData()
+      })
     },
   },
 }
