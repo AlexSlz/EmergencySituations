@@ -19,7 +19,7 @@ namespace EmergencySituations.Controllers
         [HttpGet("id/{id}")]
         public IActionResult Get(int id)
         {
-            return Ok(MyDataBase.Users.FirstOrDefault(i => i.Код == id));
+            return Ok(MyDataBase.Users.FirstOrDefault(i => i.Id == id));
             //return this.GetData($"SELECT * FROM [Користувачі] WHERE [Код] = {id}");
         }
 
@@ -33,16 +33,14 @@ namespace EmergencySituations.Controllers
         public IActionResult Post(User user)
         {
             MyDataBase.Users.Add(user);
-            MyDataBase.Users.UpdateTable();
             //var result = MyDataBase.AddRow("Користувачі", user);
-            return Created($"/users/id/{user.Код}", user);
+            return Created($"/users/id/{user.Id}", user);
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            MyDataBase.Users.Remove(MyDataBase.Users.Find(i => i.Код == id));
-            MyDataBase.Users.UpdateTable();
+            MyDataBase.Users.Remove(MyDataBase.Users.Find(i => i.Id == id));
             return Ok();
             //var result = MyDataBase.DeleteRow("Користувачі", id);
             //return result ? Ok() : Problem("Error");
@@ -51,8 +49,8 @@ namespace EmergencySituations.Controllers
         [HttpPut]
         public IActionResult Put(User user)
         {
-            var result = MyDataBase.UpdateRow("Користувачі", user);
-            return result ? Ok() : Problem("Error");
+            MyDataBase.Users[MyDataBase.Users.GetIndex(user)] = user;
+            return Ok();
         }
     }
 }

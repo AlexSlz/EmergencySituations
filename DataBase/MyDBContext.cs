@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using EmergencySituations.Model;
+using Newtonsoft.Json;
 
 namespace EmergencySituations.DataBase
 {
@@ -17,12 +18,27 @@ namespace EmergencySituations.DataBase
         {
             string json = MyDataBase.GetData($"SELECT * FROM [{_tableName}]");
             this.Clear();
+            GC.Collect();
             this.AddRange(JsonConvert.DeserializeObject<List<T>>(json));
         }
 
-        public void UpdateTable()
+        public new virtual void Add(T element)
         {
+            MyDataBase.AddRow(_tableName, element);
+            Load();
+        }
 
+        public new virtual void Remove(T element)
+        {
+            MyDataBase.DeleteRow(_tableName, element.Id);
+            Load();
+        }
+
+        public int GetIndex(T element)
+        {
+            var find = this.Find(i => i.Id == element.Id);
+            MyDataBase.UpdateRow(_tableName, element);
+            return this.IndexOf(find);
         }
 
     }

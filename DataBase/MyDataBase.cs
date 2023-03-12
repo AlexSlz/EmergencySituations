@@ -10,6 +10,7 @@ namespace EmergencySituations.DataBase
     public static class MyDataBase
     {
         public static MyDBContext<User> Users = new MyDBContext<User>("Користувачі");
+        public static MyDBContext<Position> Positions = new MyDBContext<Position>("Позиція НС");
 
         private static OleDbConnection _conn = null;
 
@@ -20,6 +21,7 @@ namespace EmergencySituations.DataBase
             _conn = new OleDbConnection(connString);
             TryConnectToDB(_conn);
             Users.Load();
+            Positions.Load();
         }
 
         public static ContentResult GetData(this ControllerBase controller, string q)
@@ -38,66 +40,130 @@ namespace EmergencySituations.DataBase
             {
                 table.Load(reader);
             }
+            Console.WriteLine($"[+] {q}");
             return JsonConvert.SerializeObject(table, Formatting.Indented);
+        }
+
+        public static int CountRow(string table, string addons = "")
+        {
+            string q = $"SELECT COUNT(*) FROM [{table}] {addons}";
+            OleDbCommand command = new OleDbCommand(q, _conn);
+            return (int)command.ExecuteScalar();
         }
 
         public static bool AddRow(string tableName, IModel obj)
         {
             var data = obj.ToDictionary();
 
-            string q = $"INSERT INTO [{tableName}] ({String.Join(", ", data.Keys.ToArray())}) VALUES (@{String.Join(", @", data.Keys.ToArray())})";
-            return RowAction(data, q);
+            var temp = GetValue(data, tableName);
+
+            string q = $"INSERT INTO [{tableName}] ([{String.Join("], [", data.Keys.ToArray())}]) VALUES ({String.Join(", ", temp.ToArray())})";
+            return ExecuteQuery(q);
+        }
+
+
+        public static bool AddRowOld(string tableName, Dictionary<string, object> data)
+        {
+            var temp = GetValue(data, tableName);
+
+            string q = $"INSERT INTO [{tableName}] ([{String.Join("], [", data.Keys.ToArray())}]) VALUES ({String.Join(", ", temp.ToArray())})";
+            return ExecuteQuery(q);
         }
 
         public static bool UpdateRow(string tableName, IModel obj)
         {
             var data = obj.ToDictionary();
 
-            var temp = new List<string>();
-            foreach (var row in data)
-            {
-                temp.Add($"[{row.Key}] = @{row.Key}");
-            }
-            string q = $"UPDATE [{tableName}] SET {String.Join(", ", temp.ToArray())} WHERE [Код] = {obj.Код}";
-            return RowAction(data, q);
+            var temp = GetValue(data, tableName, true);
+            string q = $"UPDATE [{tableName}] SET {String.Join(", ", temp.ToArray())} WHERE [Код] = {obj.Id}";
+            return ExecuteQuery(q);
         }
 
-        private static bool RowAction(Dictionary<string, object> data, string q)
+        private static List<string> GetValue(Dictionary<string, object> data, string tableName, bool update = false)
+        {
+            var temp = new List<string>();
+            var columnName = GetKeyTypeTable(tableName);
+            foreach (var row in data)
+            {
+                string value = $"'{row.Value}'";
+                if (columnName[row.Key] == "Int32")
+                {
+                    value = (row.Value.ToString());
+                }
+                if (row.Key.Contains("Дата"))
+                {
+                    value = value.Replace('T', ' ');
+                }
+                temp.Add($"{(update ? $"[{row.Key}] =" : "")}{value}");
+            }
+            return temp;
+        }
+
+        private static bool ExecuteQuery(string q)
         {
             try
             {
                 using (OleDbCommand cmd = new OleDbCommand(q, _conn))
                 {
-                    foreach (var item in data)
-                    {
-                        cmd.Parameters.AddWithValue(item.Key, item.Value);
-                    }
                     cmd.ExecuteNonQuery();
                 }
+                Console.WriteLine($"[+] {q}");
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"[!] {q}\n{ex.Message}");
                 return false;
+            }
+        }
+
+        public static string ExecuteQueryWithValue(string q)
+        {
+            using (OleDbCommand cmd = new OleDbCommand(q, _conn))
+            {
+                return cmd.ExecuteScalar().ToString();
             }
         }
 
         public static bool DeleteRow(string tableName, int id)
         {
             string q = $"DELETE FROM [{tableName}] WHERE [Код] = {id}";
-            try
+            return ExecuteQuery(q);
+        }
+
+        public static Dictionary<string, string> GetKeyTypeTable(string tableName)
+        {
+            Dictionary<string, string> result = new Dictionary<string, string>();
+
+
+            string q = $"SELECT * FROM [{tableName}]";
+
+
+            using(OleDbCommand cmd = new OleDbCommand(q, _conn))
+            using(OleDbDataReader rdr = cmd.ExecuteReader())
             {
-                using (OleDbCommand cmd = new OleDbCommand(q, _conn))
+                rdr.Read();
+                for (int i = 0; i < rdr.VisibleFieldCount; i++)
                 {
-                    cmd.ExecuteNonQuery();
+                    System.Type type = rdr.GetFieldType(i);
+
+                    result.Add(rdr.GetName(i), type.Name);
                 }
-                return true;
             }
-            catch (Exception)
+
+            return result;
+        }
+
+        public static List<string> GetTableNameList()
+        {
+            List<string> list = new List<string>();
+            DataTable dt = _conn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] { null, null, null, "TABLE" });
+            foreach (DataRow dr in dt.Rows)
             {
-                return false;
+                if (!dr["TABLE_NAME"].ToString().Contains("~"))
+                    list.Add(dr["TABLE_NAME"].ToString());
             }
+            return list;
         }
 
         private static void TryConnectToDB(OleDbConnection conn)
@@ -105,13 +171,13 @@ namespace EmergencySituations.DataBase
             try
             {
                 conn.Open();
-                Console.WriteLine("--- DB Connected [ :) ]");
+                Console.WriteLine("\n[+] DB Connected\n");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("--- DB NOT Connected [ :( ]");
+                Console.WriteLine("\n[!] DB NOT Connected\n");
                 Console.WriteLine(ex.Message);
-                Console.WriteLine("--- ReConnect?");
+                Console.WriteLine("\n[?]ReConnect?\n");
                 if (string.IsNullOrEmpty(Console.ReadLine()))
                 {
                     TryConnectToDB(conn);

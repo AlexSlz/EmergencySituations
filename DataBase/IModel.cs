@@ -2,6 +2,6 @@
 {
     public interface IModel
     {
-        int Код { get; set; }
+        int Id { get; set; }
     }
 }
