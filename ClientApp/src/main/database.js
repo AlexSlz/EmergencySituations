@@ -18,17 +18,25 @@ async function getTableNameList() {
 
 function setupObject(data, customData) {
     var dataVisual = { ...data }
+    console.log(data)
     var dataValue = { ...data }
     Object.keys(data).forEach(name => {
         switch (data[name]) {
+            case 'Double':
             case 'Int32':
                 dataVisual[name] = setupNumber(name)
                 dataValue[name] = 0
                 break;
             case 'String':
-                dataVisual[name] = { element: 'input', type: 'text', disabled: false }
-                dataValue[name] = '123'
+                if (name == 'Зображення')
+                    dataVisual[name] = { element: 'input', type: 'file', disabled: false }
+                else if (name == 'Опис')
+                    dataVisual[name] = { element: 'textarea', disabled: false }
+                else
+                    dataVisual[name] = { element: 'input', type: 'text', disabled: false }
+                dataValue[name] = ''
                 break
+
             case 'DateTime':
                 dataValue[name] = getTime()
                 dataVisual[name] = { element: 'input', type: 'datetime-local', disabled: false }
@@ -51,8 +59,13 @@ function setupObject(data, customData) {
 function getTime() {
     var date = new Date().toJSON().slice(0, 10);
 
-    var result = `${date}T${new Date().getHours()}:${new Date().getMinutes()}`
-
+    var hours = new Date().getHours()
+    if (hours < 10)
+        hours = `0${hours}`
+    var minutes = new Date().getMinutes()
+    if (minutes < 10)
+        minutes = `0${minutes}`
+    var result = `${date}T${hours}:${minutes}`
     return result
 }
 
@@ -76,6 +89,29 @@ function getDataFromTable(tableName) {
     return axios(`${apiName}/${tableName}`).then((res) => res.data)
 }
 
+
+async function getEmergencyData() {
+    var result = await axios('api/tables/Надзвичайні ситуації').then((eme) => {
+        return eme.data
+    })
+
+    result = await loadPointsList(result)
+
+    return await result
+}
+
+async function loadPointsList(emergencyList) {
+    let result = await axios('api/tables/Позиція НС')
+        .then((points) => {
+            emergencyList.forEach((element) => {
+                var result = points.data.filter((i) => i['Код нс'] == element.Код)
+                element.Points = result
+            })
+            return emergencyList
+        })
+    return await result
+}
+
 export default {
-    getKeys, getTableNameList, setupObject, getDataFromTable, getLastIdFromTable
+    getKeys, getTableNameList, setupObject, getDataFromTable, getLastIdFromTable, getEmergencyData
 }

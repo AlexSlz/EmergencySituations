@@ -1,5 +1,14 @@
 <template>
-  <input class="input" :value="modelValue" @input="updateInput" :type="type" :disabled="disabled" />
+  <input
+    class="input"
+    :value="modelValue"
+    @input="updateInput"
+    :type="type"
+    :disabled="disabled"
+    placeholder="Введіть значення"
+    accept="image/*"
+    required
+  />
 </template>
 <script>
 export default {

@@ -1,7 +1,7 @@
-﻿using EmergencySituations.DataBase;
+﻿using EmergencySituations.Auth;
+using EmergencySituations.DataBase;
 using EmergencySituations.Model;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace EmergencySituations.Controllers
 {
@@ -9,28 +9,23 @@ namespace EmergencySituations.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
+        [AuthFilter]
         [HttpGet]
-        public IActionResult Get()
+        public ActionResult<string> Get()
         {
             return Ok(MyDataBase.Users);
             //return this.GetData("SELECT * FROM [Користувачі]");
         }
 
         [HttpGet("id/{id}")]
-        public IActionResult Get(int id)
+        public ActionResult<string> Get(int id)
         {
             return Ok(MyDataBase.Users.FirstOrDefault(i => i.Id == id));
             //return this.GetData($"SELECT * FROM [Користувачі] WHERE [Код] = {id}");
         }
 
-        [HttpGet("login/{login}")]
-        public IActionResult Get(string login)
-        {
-            return Ok(MyDataBase.Users.FirstOrDefault(i => i.Логін == login));
-        }
-
         [HttpPost]
-        public IActionResult Post(User user)
+        public ActionResult<string> AddUser(User user)
         {
             MyDataBase.Users.Add(user);
             //var result = MyDataBase.AddRow("Користувачі", user);
@@ -38,7 +33,7 @@ namespace EmergencySituations.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public ActionResult<string> Delete(int id)
         {
             MyDataBase.Users.Remove(MyDataBase.Users.Find(i => i.Id == id));
             return Ok();
@@ -47,7 +42,7 @@ namespace EmergencySituations.Controllers
         }
 
         [HttpPut]
-        public IActionResult Put(User user)
+        public ActionResult<string> Put(User user)
         {
             MyDataBase.Users[MyDataBase.Users.GetIndex(user)] = user;
             return Ok();

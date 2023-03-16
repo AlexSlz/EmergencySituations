@@ -6,6 +6,7 @@ namespace EmergencySituations.DataBase
     public class MyDBContext<T> : List<T> where T : IModel
     {
         private string _tableName;
+        public string TableName => _tableName;
 
         public MyDBContext(string tableName)
         {
@@ -40,7 +41,6 @@ namespace EmergencySituations.DataBase
             MyDataBase.UpdateRow(_tableName, element);
             return this.IndexOf(find);
         }
-
     }
     public static class MyDBContextStatic
     {

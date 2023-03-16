@@ -10,7 +10,9 @@ namespace EmergencySituations.DataBase
     public static class MyDataBase
     {
         public static MyDBContext<User> Users = new MyDBContext<User>("Користувачі");
+        public static MyDBContext<Emergency> Emergency = new MyDBContext<Emergency>("Надзвичайні ситуації");
         public static MyDBContext<Position> Positions = new MyDBContext<Position>("Позиція НС");
+
 
         private static OleDbConnection _conn = null;
 
@@ -22,12 +24,7 @@ namespace EmergencySituations.DataBase
             TryConnectToDB(_conn);
             Users.Load();
             Positions.Load();
-        }
-
-        public static ContentResult GetData(this ControllerBase controller, string q)
-        {
-            var result = GetData(q);
-            return controller.Content(result, "application/json");
+            Emergency.Load();
         }
 
         public static string GetData(string q)
@@ -36,9 +33,17 @@ namespace EmergencySituations.DataBase
                 return null;
             DataTable table = new DataTable();
             OleDbCommand cmd = new OleDbCommand(q, _conn);
-            using (OleDbDataReader reader = cmd.ExecuteReader())
+            try
             {
-                table.Load(reader);
+                using (OleDbDataReader reader = cmd.ExecuteReader())
+                {
+                    table.Load(reader);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
             }
             Console.WriteLine($"[+] {q}");
             return JsonConvert.SerializeObject(table, Formatting.Indented);

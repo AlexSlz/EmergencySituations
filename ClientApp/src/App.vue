@@ -1,20 +1,26 @@
 <script setup>
 import MapView from './components/MapView.vue'
-import ListView from './components/ListView/ListView.vue'
+import EventList from './components/EventList/EventList.vue'
 
+import MyPanel from './components/Panel/PanelBody.vue'
+import Tab from './components/Panel/PanelTab.vue'
 import AddMenu from './components/AddMenu.vue'
 
-import axios from 'axios'
+import database from './main/database'
+import Login from './components/Login.vue'
 </script>
 
 <template>
   <div class="h-screen">
-    <MapView class="h-full z-0" ref="Map" :list="emergencyList" />
+    <MapView class="h-full z-0" ref="Map" @ClickOnElement="selectElement" :list="emergencyList" />
   </div>
-  <my-panel>
-    <AddMenu @UpdateItems="UpdateItems" :tableName="'Надзвичайні ситуації'" />
-    <ListView ref="List" :elementList="emergencyList" :selectedElement="selectedElement" @ClickOnElement="selectElement" />
-  </my-panel>
+  <MyPanel>
+    <Tab name="Події" :selected="true"
+      ><EventList ref="List" :elementList="emergencyList" :selectedElement="selectedElement" @ClickOnElement="selectElement"
+    /></Tab>
+    <Tab name="Login"><Login /></Tab>
+    <Tab :fullPage="true" name="Admin"></Tab>
+  </MyPanel>
 </template>
 
 <script>
@@ -32,31 +38,20 @@ export default {
     selectElement(element) {
       if (element === undefined) return
       this.selectedElement = element
-      if (element != null) this.$refs.Map.LookAtElement(element)
-      else this.$refs.Map.zoomOut()
+      this.$refs.Map.LookAtElement(element)
+      if (element == null) this.$refs.Map.zoomOut()
     },
   },
   beforeMount() {
-    axios('api/tables/Надзвичайні ситуації').then((eme) => {
-      this.emergencyList = eme.data
-      axios('api/tables/Позиція НС')
-        .then((points) => {
-          this.emergencyList.forEach((element) => {
-            var result = points.data.filter((i) => i['Код нс'] == element.Код)
-            element.Points = result
-          })
-        })
-        .then((e) => {
-          this.$refs.Map.displayMarkers()
-        })
-    })
-    // axios('api/tables/Позиція НС')
-    //   .then((res) => {
-    //     this.emergencyList = res.data
-    //   })
-    //   .then(() => {
-    //     this.$refs.Map.displayMarkers()
-    //   })
+    database
+      .getEmergencyData()
+      .then((e) => {
+        this.emergencyList = e
+      })
+      .catch((e) => {
+        console.log(e)
+      })
   },
+  components: { Login },
 }
 </script>

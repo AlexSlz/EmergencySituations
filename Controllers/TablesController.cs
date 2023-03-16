@@ -1,6 +1,4 @@
 ﻿using EmergencySituations.DataBase;
-using EmergencySituations.Model;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -10,12 +8,6 @@ namespace EmergencySituations.Controllers
     [ApiController]
     public class TablesController : ControllerBase
     {
-        [HttpGet("{name}")]
-        public IActionResult GetValue(string name)
-        {
-            return this.GetData($"SELECT * FROM [{name}]");
-        }
-
         [HttpGet("getLastId/{name}")]
         public IActionResult GetLastID(string name)
         {

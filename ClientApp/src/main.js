@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import './assets/style.css'
 import 'leaflet/dist/leaflet.css'
 
+
 import components from './components/UI'
 
 import App from './App.vue'

@@ -28,12 +28,25 @@ export default {
       this.$emit('update:modelValue', e.target.value)
     },
   },
-  mounted() {
-    if (this.items != null) this.itemsVisual = this.items
-    else if (this.tableName != '')
-      database.getDataFromTable(this.tableName).then((i) => {
-        this.itemsVisual = i.map((a) => a.Назва)
-      })
+  watch: {
+    tableName: {
+      immediate: true,
+      handler(val, oldVal) {
+        if (val != undefined) {
+          database.getDataFromTable(this.tableName).then((i) => {
+            this.itemsVisual = i.map((a) => a.Назва)
+          })
+        }
+      },
+    },
+    items: {
+      immediate: true,
+      handler(val, oldVal) {
+        if (val != undefined) {
+          this.itemsVisual = val
+        }
+      },
+    },
   },
 }
 </script>

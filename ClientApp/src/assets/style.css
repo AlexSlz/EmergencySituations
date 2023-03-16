@@ -19,6 +19,10 @@ body {
   @apply hover:border-b-cyan-400 border-b-yellow-300 border-b-2 duration-75 bg-slate-800 w-full;
 }
 
+.input:disabled {
+  @apply bg-slate-400;
+}
+
 .gps_ring {
   @apply rounded-full bg-red-500 animate-ping h-5 w-5;
 }

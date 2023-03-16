@@ -19,6 +19,7 @@ export default {
   data() {
     return {
       map: null,
+      markerList: [],
       tempList: [],
     }
   },
@@ -43,45 +44,38 @@ export default {
         [90, 180],
       ],
     }).addTo(this.map)
+    L.control
+      .attribution({
+        position: 'bottomleft',
+      })
+      .addTo(this.map)
   },
   methods: {
     LookAtElement(element) {
-      const animatedCircleIcon = {
-        icon: L.divIcon({
-          className: 'css-icon',
-          html: '<div class="gps_ring"></div>',
-          iconSize: [18, 22],
-        }),
-      }
-      var temp = []
-      element.Points.forEach((i) => {
-        temp.push(L.marker([i.X, i.Y], animatedCircleIcon).addTo(this.map))
-      })
-      setTimeout(() => {
-        temp.forEach((i) => {
-          this.map.removeLayer(i)
-        })
-      }, 4700)
-      var pos = this.getElementsCenter(element.Points)
-      console.log(pos.zoom)
-      this.map.flyTo([pos.X, pos.Y], pos.zoom, {
-        animate: true,
-        duration: 1.5,
-      })
-    },
+      // const animatedCircleIcon = {
+      //   icon: L.divIcon({
+      //     className: 'css-icon',
+      //     html: '<div class="gps_ring"></div>',
+      //     iconSize: [18, 22],
+      //   }),
+      // }
 
-    getElementsCenter(element) {
-      var count = 0
-      var xSum = 0
-      var ySum = 0
-      element.forEach((i) => {
-        xSum += i.X
-        ySum += i.Y
-        count++
+      var Points = []
+      this.markerList.forEach((m) => {
+        m.setStyle({ color: 'red' })
+        if (element != null)
+          element.Points.forEach((i) => {
+            if (m._latlng.lat == i.X && m._latlng.lng == i.Y) {
+              m.setStyle({ color: 'yellow' }).bringToFront()
+              Points.push([i.X, i.Y])
+            }
+          })
       })
-      xSum /= count
-      ySum /= count
-      return { X: xSum, Y: ySum, zoom: 9 }
+
+      if (element == null) return
+
+      // animate: true, duration: 1.5
+      this.map.fitBounds(new L.LatLngBounds(Points), { maxZoom: 10 })
     },
 
     zoomOut() {
@@ -92,10 +86,15 @@ export default {
         })
     },
 
-    displayMarkers() {
-      this.list.forEach((element) => {
+    displayMarkers(elements) {
+      elements.forEach((element) => {
         element.Points.forEach((i) => {
-          L.marker([i.X, i.Y]).addTo(this.map)
+          var marker = L.circleMarker([i.X, i.Y], { color: 'red', radius: 13, fillOpacity: 0.9 })
+            .addTo(this.map)
+            .on('click', (e) => {
+              this.$emit('ClickOnElement', element)
+            })
+          this.markerList.push(marker)
         })
       })
     },
@@ -127,5 +126,14 @@ export default {
       this.tempList = []
     },
   },
+  watch: {
+    list: {
+      immediate: true,
+      handler(val, oldVal) {
+        this.displayMarkers(val)
+      },
+    },
+  },
+  emits: ['ClickOnElement'],
 }
 </script>
