@@ -33,24 +33,34 @@ export default {
 </script>
 <style scoped>
 .panel {
-  @apply absolute p-3 z-20 right-0 top-0 h-full overflow-y-auto bg-gray-800 min-w-[100%] sm:min-w-[38vh];
+  @apply absolute z-20 right-0 top-0 h-full overflow-y-auto bg-neutral-800 min-w-[100%] sm:min-w-[21vw] sm:max-w-sm;
 }
 .fold {
   @apply h-auto;
 }
 .tabs {
-  @apply relative overflow-hidden bg-gray-500 flex justify-center m-2;
+  @apply relative overflow-hidden bg-neutral-600 flex justify-center m-2;
 }
 .tabs li {
   @apply text-center p-2; /*float-left list-item*/
 }
 .active {
-  @apply bg-cyan-800;
+  @apply border-emerald-600 border-b-2;
 }
 .mobile {
   @apply block sm:hidden;
 }
 .panel:has(.fullPage) {
-  @apply w-full;
+  @apply w-full sm:max-w-full;
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
 }
 </style>

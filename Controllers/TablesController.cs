@@ -1,6 +1,8 @@
-﻿using EmergencySituations.DataBase;
+﻿using EmergencySituations.Auth;
+using EmergencySituations.DataBase;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Drawing;
 
 namespace EmergencySituations.Controllers
 {
@@ -8,44 +10,59 @@ namespace EmergencySituations.Controllers
     [ApiController]
     public class TablesController : ControllerBase
     {
-        [HttpGet("getLastId/{name}")]
-        public IActionResult GetLastID(string name)
+        [AuthFilter(new string[] {"Користувачі"})]
+        [HttpGet("{tableName}")]
+        public ActionResult<string> GetTable(string tableName)
         {
-            if (MyDataBase.CountRow(name) == 0)
-                return Ok("0");
-            else
+            var a = new MyDBContext(tableName);
+            return Ok(a);
+        }
+
+        [HttpGet("main")]
+        public ActionResult<string> GetMainTable()
+        {
+            var a = new MyDBContext("Надзвичайні ситуації");
+            var type = new MyDBContext("Тип НС");
+            var level = new MyDBContext("Рівень НС");
+            foreach (var item in a)
             {
-                return Ok(MyDataBase.ExecuteQueryWithValue($"SELECT MAX(Код) FROM [{name}]"));
+                item["Тип"] = type.FindById(item["Тип"])["Назва"];
+                item["Рівень"] = level.FindById(item["Рівень"])["Назва"];
             }
+            return Ok(a);
         }
 
-        [HttpGet("getKey/{name}")]
-        public IActionResult GetKey(string name)
+        [HttpGet("{tableName}/getLastId")]
+        public IActionResult GetLastID(string tableName)
         {
-            return Ok(JsonConvert.SerializeObject(MyDataBase.GetKeyTypeTable(name)));
+            var data = new MyDBContext(tableName);
+            return Ok(data.GetMaxId());
         }
 
+        [HttpGet("{tableName}/getKey")]
+        public IActionResult GetKey(string tableName)
+        {
+            return Ok(MyDataBase.GetKeyTypeTable(tableName));
+        }
+
+        [AuthFilter]
         [HttpGet("getTableNameList")]
         public IActionResult Get()
         {
             return Ok(MyDataBase.GetTableNameList());
         }
 
-        [HttpPost("{name}")]
-        public IActionResult Post(string name, object json)
+        [AuthFilter]
+        [HttpPost("{tableName}")]
+        public IActionResult Post(string tableName, object json)
         {
-            Dictionary<string, object> data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json.ToString());
-            MyDataBase.AddRowOld(name, data);
-            return Ok();
-        }
-        [HttpPost("{name}/many")]
-        public IActionResult PostMany(string name, object json)
-        {
-            List<Dictionary<string, object>> data = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(json.ToString());
-            foreach (var item in data)
+            var data = new MyDBContext(json);
+
+            data.ForEach(item =>
             {
-                MyDataBase.AddRowOld(name, item);
-            }
+                MyDataBase.AddRow(tableName, item);
+            });
+
             return Ok();
         }
     }

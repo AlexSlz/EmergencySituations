@@ -9,11 +9,6 @@ namespace EmergencySituations.DataBase
 {
     public static class MyDataBase
     {
-        public static MyDBContext<User> Users = new MyDBContext<User>("Користувачі");
-        public static MyDBContext<Emergency> Emergency = new MyDBContext<Emergency>("Надзвичайні ситуації");
-        public static MyDBContext<Position> Positions = new MyDBContext<Position>("Позиція НС");
-
-
         private static OleDbConnection _conn = null;
 
         public static void Connect(string fileName)
@@ -22,65 +17,43 @@ namespace EmergencySituations.DataBase
             string connString = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={filePath};Persist Security Info=False;";
             _conn = new OleDbConnection(connString);
             TryConnectToDB(_conn);
-            Users.Load();
-            Positions.Load();
-            Emergency.Load();
         }
 
-        public static string GetData(string q)
+        public static List<Dictionary<string, dynamic>> GetData(string q)
         {
             if (string.IsNullOrEmpty(q))
                 return null;
-            DataTable table = new DataTable();
-            OleDbCommand cmd = new OleDbCommand(q, _conn);
             try
             {
+                using (DataTable table = new DataTable())
+                using (OleDbCommand cmd = new OleDbCommand(q, _conn))
                 using (OleDbDataReader reader = cmd.ExecuteReader())
                 {
                     table.Load(reader);
+                    return table.AsEnumerable().Select(
+                        row => table.Columns.Cast<DataColumn>().ToDictionary(
+                            column => column.ColumnName,
+                            column => (string.IsNullOrEmpty(row[column].ToString())) ? "" : row[column])).ToList();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"[!] {q}\n{ex.Message}");
                 return null;
             }
-            Console.WriteLine($"[+] {q}");
-            return JsonConvert.SerializeObject(table, Formatting.Indented);
         }
 
-        public static int CountRow(string table, string addons = "")
+        public static bool AddRow(string tableName, Dictionary<string, object> data)
         {
-            string q = $"SELECT COUNT(*) FROM [{table}] {addons}";
-            OleDbCommand command = new OleDbCommand(q, _conn);
-            return (int)command.ExecuteScalar();
-        }
-
-        public static bool AddRow(string tableName, IModel obj)
-        {
-            var data = obj.ToDictionary();
-
             var temp = GetValue(data, tableName);
-
             string q = $"INSERT INTO [{tableName}] ([{String.Join("], [", data.Keys.ToArray())}]) VALUES ({String.Join(", ", temp.ToArray())})";
             return ExecuteQuery(q);
         }
 
-
-        public static bool AddRowOld(string tableName, Dictionary<string, object> data)
+        public static bool UpdateRow(string tableName, Dictionary<string, object> data)
         {
-            var temp = GetValue(data, tableName);
-
-            string q = $"INSERT INTO [{tableName}] ([{String.Join("], [", data.Keys.ToArray())}]) VALUES ({String.Join(", ", temp.ToArray())})";
-            return ExecuteQuery(q);
-        }
-
-        public static bool UpdateRow(string tableName, IModel obj)
-        {
-            var data = obj.ToDictionary();
-
             var temp = GetValue(data, tableName, true);
-            string q = $"UPDATE [{tableName}] SET {String.Join(", ", temp.ToArray())} WHERE [Код] = {obj.Id}";
+            string q = $"UPDATE [{tableName}] SET {String.Join(", ", temp.ToArray())} WHERE [Код] = {data["Код"]}";
             return ExecuteQuery(q);
         }
 
@@ -112,7 +85,7 @@ namespace EmergencySituations.DataBase
                 {
                     cmd.ExecuteNonQuery();
                 }
-                Console.WriteLine($"[+] {q}");
+                //Console.WriteLine($"[+] {q}");
                 return true;
             }
             catch (Exception ex)
@@ -130,7 +103,7 @@ namespace EmergencySituations.DataBase
             }
         }
 
-        public static bool DeleteRow(string tableName, int id)
+        public static bool DeleteRowById(string tableName, int id)
         {
             string q = $"DELETE FROM [{tableName}] WHERE [Код] = {id}";
             return ExecuteQuery(q);
@@ -192,6 +165,12 @@ namespace EmergencySituations.DataBase
                     Environment.Exit(0);
                 }
             }
+        }
+        private static void Disconnect(OleDbConnection conn)
+        {
+            conn.Close();
+            GC.SuppressFinalize(conn);
+            GC.Collect();
         }
     }
 }

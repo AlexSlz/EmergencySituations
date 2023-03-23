@@ -1,67 +1,58 @@
-﻿using EmergencySituations.Model;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace EmergencySituations.DataBase
 {
-    public class MyDBContext<T> : List<T> where T : IModel
+    public class MyDBContext : List<Dictionary<string, object>>
     {
         private string _tableName;
-        public string TableName => _tableName;
-
         public MyDBContext(string tableName)
         {
             _tableName = tableName;
+            Load();
         }
 
-        public static implicit operator string(MyDBContext<T> t) => JsonConvert.SerializeObject(t);
-
-        public void Load()
+        public MyDBContext(object data)
         {
-            string json = MyDataBase.GetData($"SELECT * FROM [{_tableName}]");
+            try
+            {
+                var i = JsonConvert.DeserializeObject<Dictionary<string, object>>(data.ToString());
+                this.Add(i);
+            }
+            catch
+            {
+                var i = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(data.ToString());
+                this.AddRange(i);
+            }
+        }
+
+        private void Load()
+        {
             this.Clear();
             GC.Collect();
-            this.AddRange(JsonConvert.DeserializeObject<List<T>>(json));
+            var data = MyDataBase.GetData($"SELECT * FROM [{_tableName}]");
+            if(data != null)
+            this.AddRange(data);
         }
 
-        public new virtual void Add(T element)
+        public Dictionary<string, object> FindById(object data, string key = "Код")
         {
-            MyDataBase.AddRow(_tableName, element);
-            Load();
+            return this.FirstOrDefault(i => i[key].ToString() == data.ToString());
         }
 
-        public new virtual void Remove(T element)
+        public string ToJson()
         {
-            MyDataBase.DeleteRow(_tableName, element.Id);
-            Load();
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
 
-        public int GetIndex(T element)
+        public int GetMaxId()
         {
-            var find = this.Find(i => i.Id == element.Id);
-            MyDataBase.UpdateRow(_tableName, element);
-            return this.IndexOf(find);
-        }
-    }
-    public static class MyDBContextStatic
-    {
-        public static Dictionary<string, object> ToDictionary(this IModel model)
-        {
-            var serializedModel = JsonConvert.SerializeObject(model);
-            var result = JsonConvert.DeserializeObject<Dictionary<string, object>>(serializedModel);
-            foreach (var pair in result)
-            {
-                if (pair.Key == "Код")
-                {
-                    result.Remove(pair.Key);
-                    break;
-                }
-            }
-            return result;
+            return (this.Count > 0) ?  int.Parse(this.MaxBy(x => x["Код"])["Код"].ToString()) : 0;
         }
 
-        public static string ToJson(this IModel model)
+        ~MyDBContext()
         {
-            return JsonConvert.SerializeObject(model);
+            GC.Collect();
+            GC.SuppressFinalize(this);
         }
     }
 }

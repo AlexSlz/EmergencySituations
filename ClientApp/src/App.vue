@@ -1,57 +1,65 @@
 <script setup>
-import MapView from './components/MapView.vue'
-import EventList from './components/EventList/EventList.vue'
+import MapView from '@/components/MapView.vue'
+import EventList from '@/components/EventList/EventList.vue'
 
-import MyPanel from './components/Panel/PanelBody.vue'
-import Tab from './components/Panel/PanelTab.vue'
-import AddMenu from './components/AddMenu.vue'
+import MyPanel from '@/components/Panel/PanelBody.vue'
+import Tab from '@/components/Panel/PanelTab.vue'
+import Login from '@/components/Login.vue'
 
-import database from './main/database'
-import Login from './components/Login.vue'
+import database from '@/main/database'
 </script>
 
 <template>
-  <div class="h-screen">
-    <MapView class="h-full z-0" ref="Map" @ClickOnElement="selectElement" :list="emergencyList" />
-  </div>
+  <MapView class="h-screen z-0 w-full sm:w-[79vw]" ref="Map" />
   <MyPanel>
-    <Tab name="Події" :selected="true"
-      ><EventList ref="List" :elementList="emergencyList" :selectedElement="selectedElement" @ClickOnElement="selectElement"
+    <Tab name="Події" :selected="true">
+      <h1 class="text-center pt-3" v-if="isListLoading">Завантаження списку подій...</h1>
+      <EventList ref="List" v-if="!isListLoading"
     /></Tab>
-    <Tab name="Login"><Login /></Tab>
-    <Tab :fullPage="true" name="Admin"></Tab>
+    <template v-if="!authStore.isAuth">
+      <Tab v-if="!authStore.isAuth" name="Login"><Login /></Tab>
+    </template>
+    <template v-else>
+      <Tab :fullPage="true" name="Admin"></Tab>
+      <Tab name="Logout"><button @click="authStore.logout()">Confirm</button></Tab>
+    </template>
   </MyPanel>
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth'
+import { useEmergencyStore } from './stores/emergency'
 export default {
   data() {
     return {
-      selectedElement: null,
-      emergencyList: [],
+      isListLoading: true,
+      authStore: useAuthStore(),
+      emergencyStore: useEmergencyStore(),
     }
   },
   methods: {
-    UpdateItems(items) {
-      this.$refs.Map.displayNewMarkers(items)
+    Logout() {
+      console.log('a')
+      this.authStore.logout()
     },
-    selectElement(element) {
-      if (element === undefined) return
-      this.selectedElement = element
-      this.$refs.Map.LookAtElement(element)
-      if (element == null) this.$refs.Map.zoomOut()
+    loadEmergency() {
+      database
+        .getEmergencyData()
+        .then((e) => {
+          this.emergencyStore.emergencyList = e
+        })
+        .catch((e) => {
+          console.log(e)
+        })
+        .finally((e) => {
+          this.isListLoading = false
+        })
     },
   },
   beforeMount() {
-    database
-      .getEmergencyData()
-      .then((e) => {
-        this.emergencyList = e
-      })
-      .catch((e) => {
-        console.log(e)
-      })
+    if (this.emergencyStore.emergencyList != []) {
+      this.loadEmergency()
+    }
   },
-  components: { Login },
 }
 </script>

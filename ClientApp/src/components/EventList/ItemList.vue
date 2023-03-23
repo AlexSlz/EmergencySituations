@@ -1,7 +1,11 @@
 <template>
   <div class="item">
-    <h1 class="truncate">{{ data.Назва }}</h1>
-    <p>{{ data.Опис }}</p>
+    <p class="text-2xl py-3">
+      {{ data.Назва }}
+      <span class="text-sm tracking-normal whitespace-nowrap text-emerald-500">{{ getTime(data['Дата та час']) }}</span>
+    </p>
+    <p class="line-clamp-3 text-neutral-400">{{ data.Опис }}</p>
+    <img v-show="imgLoad" :src="getImage(data.Зображення)" @load="imgLoad = true" />
   </div>
 </template>
 <script>
@@ -12,10 +16,29 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      imgLoad: false,
+    }
+  },
+  methods: {
+    getImage(id) {
+      if (id != '') return `${window.location.origin}/api/file/Надзвичайні ситуації/${id}`
+    },
+    getTime(time) {
+      var result = time.replace('T', ' ')
+      var temp = result.split(' ', 2)
+      if (temp[1] === '00:00:00') return temp[0]
+      return result
+    },
+  },
 }
 </script>
 <style>
 .item {
-  @apply bg-gray-900 p-3 mb-5;
+  @apply px-7 py-3 border-b-2 border-neutral-500 hover:border-neutral-400 hover:cursor-pointer;
+}
+img {
+  @apply sm:w-auto w-96 p-1 sm:m-auto;
 }
 </style>

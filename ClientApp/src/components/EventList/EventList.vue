@@ -5,26 +5,22 @@ import ItemList from './ItemList.vue'
 
 <template>
   <div class="block">
-    <div v-if="selectedElement != null">
-      <my-button @click="this.$emit('ClickOnElement', null)">Close</my-button>
-      <ItemInfo :selectedElement="selectedElement" />
+    <div v-if="emergencyStore.selectedElement != null">
+      <my-button @click="emergencyStore.selectElement(null)">Назад</my-button>
+      <ItemInfo :selectedElement="emergencyStore.selectedElement" />
     </div>
-    <ItemList @click="this.$emit('ClickOnElement', item)" v-else :data="item" v-for="item in elementList" />
+    <ItemList @click="emergencyStore.selectElement(item)" v-else :data="item" v-for="item in emergencyStore.emergencyList" />
+    <h1 v-if="emergencyStore.emergencyList.length == 0" class="text-center pt-3">Список порожній.</h1>
   </div>
 </template>
 
 <script>
+import { useEmergencyStore } from '@/stores/emergency'
 export default {
-  props: {
-    elementList: {
-      type: Array,
-      required: true,
-    },
-    selectedElement: {
-      type: Object,
-    },
+  data() {
+    return {
+      emergencyStore: useEmergencyStore(),
+    }
   },
-  emits: ['ClickOnElement'],
-  components: { ItemInfo },
 }
 </script>

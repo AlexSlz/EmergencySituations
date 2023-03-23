@@ -14,10 +14,10 @@ namespace EmergencySituations.Controllers
         [HttpPost]
         public ActionResult<string> Auth(UserDto req)
         {
-            var user = MyDataBase.Users.FirstOrDefault(u => u.Login == req.Login && u.Password == req.Password);
+            var user = new MyDBContext("Користувачі").FirstOrDefault(u => u["Логін"].ToString() == req.Login && u["Пароль"].ToString() == req.Password);
             if (user == null)
                 return BadRequest("User Not Found");
-            return Token.GenerateToken(user.Login);
+            return Token.GenerateToken(user["Логін"].ToString());
         }
     }
 }

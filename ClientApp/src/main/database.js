@@ -1,4 +1,5 @@
 import axios from 'axios'
+import color from '@/main/color'
 
 const apiName = 'api/tables'
 
@@ -56,19 +57,6 @@ function setupObject(data, customData) {
     return { dataVisual, dataValue }
 }
 
-function getTime() {
-    var date = new Date().toJSON().slice(0, 10);
-
-    var hours = new Date().getHours()
-    if (hours < 10)
-        hours = `0${hours}`
-    var minutes = new Date().getMinutes()
-    if (minutes < 10)
-        minutes = `0${minutes}`
-    var result = `${date}T${hours}:${minutes}`
-    return result
-}
-
 function setupNumber(name) {
     let result
 
@@ -91,7 +79,8 @@ function getDataFromTable(tableName) {
 
 
 async function getEmergencyData() {
-    var result = await axios('api/tables/Надзвичайні ситуації').then((eme) => {
+    var result = await axios(`${apiName}/main`).then((eme) => {
+        console.log(eme.data)
         return eme.data
     })
 
@@ -101,17 +90,24 @@ async function getEmergencyData() {
 }
 
 async function loadPointsList(emergencyList) {
-    let result = await axios('api/tables/Позиція НС')
+    let result = await axios(`${apiName}/Позиції НС`)
         .then((points) => {
             emergencyList.forEach((element) => {
                 var result = points.data.filter((i) => i['Код нс'] == element.Код)
-                element.Points = result
+                element.Points = result.map(p => ({ ...p, X: p.X, Y: p.Y }))
             })
             return emergencyList
         })
     return await result
 }
 
+async function getToken(Login, Password) {
+    let result = await axios.post('api/auth', { Login, Password }).then(res => {
+        return res.data
+    })
+    return await result
+}
+
 export default {
-    getKeys, getTableNameList, setupObject, getDataFromTable, getLastIdFromTable, getEmergencyData
+    getKeys, getTableNameList, setupObject, getDataFromTable, getLastIdFromTable, getEmergencyData, getToken
 }

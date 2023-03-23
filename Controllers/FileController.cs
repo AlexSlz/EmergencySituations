@@ -1,4 +1,5 @@
-﻿using EmergencySituations.DataBase;
+﻿using EmergencySituations.Auth;
+using EmergencySituations.DataBase;
 using EmergencySituations.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -15,15 +16,15 @@ namespace EmergencySituations.Controllers
         public FileController(IWebHostEnvironment webHostEnvironment) { _environment = webHostEnvironment; }
 
         [HttpPost("{table}")]
-        public IActionResult Post([FromForm] IFormFile file, string table)
+        public ActionResult<string> Post([FromForm] IFormFile file, string table)
         {
-            int fileId = MyDataBase.CountRow(table);
+            int fileId = new MyDBContext(table).GetMaxId();
             try
             {
                 if (file == null)
-                    return NotFound();
+                    return BadRequest("Need File.");
                 if (file.Length <= 0)
-                    return NotFound();
+                    return BadRequest("File is to small.");
                 string path = Path.Combine(_environment.WebRootPath, "uploads", table);
                 string fileName = fileId + Path.GetExtension(file.FileName);
                 if (!Directory.Exists(path))
@@ -34,23 +35,23 @@ namespace EmergencySituations.Controllers
                 {
                     file.CopyTo(fileStream);
                     fileStream.Flush();
-                    return Ok();
+                    return Ok($"File Add to {table}");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return NotFound();
+                return BadRequest(ex.Message);
             }
         }
 
-
         [HttpGet("{table}/{id}")]
-        public IActionResult Get(string table, int id)
+        public ActionResult<string> Get(string table, int id)
         {
             string path = Path.Combine(_environment.WebRootPath, "uploads", table);
             string filePath = Directory.GetFiles(path).ToList().Find(f => Path.GetFileNameWithoutExtension(f) == id.ToString());
-            if(string.IsNullOrEmpty(filePath)) return NotFound();
+            if(string.IsNullOrEmpty(filePath)) return BadRequest("Image Not Found.");
+
             byte[] b = System.IO.File.ReadAllBytes(filePath);
             new FileExtensionContentTypeProvider().TryGetContentType(filePath, out var fileType);
             return File(b, fileType);

@@ -11,12 +11,13 @@ body {
   margin: 0;
   padding: 0;
   user-select: none;
+  @apply text-lg;
 }
 
 .input,
 .button,
 .combo {
-  @apply hover:border-b-cyan-400 border-b-yellow-300 border-b-2 duration-75 bg-slate-800 w-full;
+  @apply hover:border-b-cyan-400 border-b-yellow-300 border-b-2 duration-75 w-full bg-transparent p-2;
 }
 
 .input:disabled {

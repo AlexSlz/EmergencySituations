@@ -3,14 +3,12 @@
 </template>
 
 <script>
+import { useEmergencyStore } from '@/stores/emergency'
+import color from '@/main/color'
 import L from 'leaflet'
 
 export default {
   props: {
-    list: {
-      type: Array,
-      required: true,
-    },
     newList: {
       type: Array,
     },
@@ -21,6 +19,7 @@ export default {
       map: null,
       markerList: [],
       tempList: [],
+      emergencyStore: useEmergencyStore(),
     }
   },
   mounted() {
@@ -44,14 +43,9 @@ export default {
         [90, 180],
       ],
     }).addTo(this.map)
-    L.control
-      .attribution({
-        position: 'bottomleft',
-      })
-      .addTo(this.map)
   },
   methods: {
-    LookAtElement(element) {
+    LookAtElement(element, old) {
       // const animatedCircleIcon = {
       //   icon: L.divIcon({
       //     className: 'css-icon',
@@ -62,20 +56,22 @@ export default {
 
       var Points = []
       this.markerList.forEach((m) => {
-        m.setStyle({ color: 'red' })
-        if (element != null)
-          element.Points.forEach((i) => {
-            if (m._latlng.lat == i.X && m._latlng.lng == i.Y) {
-              m.setStyle({ color: 'yellow' }).bringToFront()
-              Points.push([i.X, i.Y])
-            }
-          })
+        if (old != null) this.colorMarker(old, m, color[old.Тип])
+        if (element != null) this.colorMarker(element, m, 'yellow', Points)
       })
 
-      if (element == null) return
-
+      if (element == null || element.Points === undefined || element.Points.length == 0) return
       // animate: true, duration: 1.5
       this.map.fitBounds(new L.LatLngBounds(Points), { maxZoom: 10 })
+    },
+
+    colorMarker(element, m, color, arr) {
+      element.Points.forEach((i) => {
+        if (m._latlng.lat == i.X && m._latlng.lng == i.Y) {
+          m.setStyle({ color: color }).bringToFront()
+          if (arr != undefined) arr.push([i.X, i.Y])
+        }
+      })
     },
 
     zoomOut() {
@@ -89,10 +85,10 @@ export default {
     displayMarkers(elements) {
       elements.forEach((element) => {
         element.Points.forEach((i) => {
-          var marker = L.circleMarker([i.X, i.Y], { color: 'red', radius: 13, fillOpacity: 0.9 })
+          var marker = L.circleMarker([i.X, i.Y], { color: color[element.Тип], radius: 13, fillOpacity: 0.9 })
             .addTo(this.map)
             .on('click', (e) => {
-              this.$emit('ClickOnElement', element)
+              this.emergencyStore.selectElement(element)
             })
           this.markerList.push(marker)
         })
@@ -127,13 +123,23 @@ export default {
     },
   },
   watch: {
-    list: {
+    'emergencyStore.emergencyList': {
       immediate: true,
+      deep: true,
       handler(val, oldVal) {
-        this.displayMarkers(val)
+        console.log(val)
+        setTimeout(() => {
+          this.displayMarkers(val)
+        })
+      },
+    },
+    'emergencyStore.selectedElement': {
+      deep: true,
+      handler(val, oldVal) {
+        if (val == null) this.zoomOut()
+        this.LookAtElement(val, oldVal)
       },
     },
   },
-  emits: ['ClickOnElement'],
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div v-show="isActive"><slot></slot></div>
+  <a v-show="isActive"><slot></slot></a>
 </template>
 <script>
 export default {
@@ -7,6 +7,7 @@ export default {
     name: { required: true },
     selected: { default: false },
     fullPage: { default: false },
+    link: { default: '' },
   },
   data() {
     return {
@@ -16,6 +17,11 @@ export default {
   created() {
     this.isActive = this.selected
     this.$parent.tabs.push(this)
+  },
+  unmounted() {
+    let id = this.$parent.tabs.indexOf(this)
+    this.$parent.tabs.splice(id, 1)
+    this.$parent.tabs[1].isActive = true
   },
 }
 </script>
