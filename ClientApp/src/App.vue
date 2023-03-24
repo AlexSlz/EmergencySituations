@@ -14,8 +14,9 @@ import database from '@/main/database'
   <MyPanel>
     <Tab name="Події" :selected="true">
       <h1 class="text-center pt-3" v-if="isListLoading">Завантаження списку подій...</h1>
-      <EventList ref="List" v-if="!isListLoading"
-    /></Tab>
+      <EventList ref="List" v-if="!isListLoading" />
+    </Tab>
+    <Tab name="Позначення"><Notation /></Tab>
     <template v-if="!authStore.isAuth">
       <Tab v-if="!authStore.isAuth" name="Login"><Login /></Tab>
     </template>
@@ -29,6 +30,7 @@ import database from '@/main/database'
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useEmergencyStore } from './stores/emergency'
+import Notation from './components/Notation.vue'
 export default {
   data() {
     return {
@@ -61,5 +63,6 @@ export default {
       this.loadEmergency()
     }
   },
+  components: { Notation },
 }
 </script>

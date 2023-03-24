@@ -26,7 +26,7 @@ export default {
     this.map = L.map('map', {
       zoomControl: false,
       fadeAnimation: true,
-      markerZoomAnimation: false,
+      //      markerZoomAnimation: false,
     }).setView([50.45, 30.53], 10)
 
     L.tileLayer(`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${import.meta.env.VITE_MAP_API_KEY}`, {
@@ -45,33 +45,23 @@ export default {
     }).addTo(this.map)
   },
   methods: {
-    LookAtElement(element, old) {
-      // const animatedCircleIcon = {
-      //   icon: L.divIcon({
-      //     className: 'css-icon',
-      //     html: '<div class="gps_ring"></div>',
-      //     iconSize: [18, 22],
-      //   }),
-      // }
+    LookAtElement(element) {
+      this.markerList.forEach((m) => {
+        L.DomUtil.removeClass(m._icon, 'gps_ring')
+      })
+      if (element == null || element.Points === undefined || element.Points.length == 0) return
 
       var Points = []
       this.markerList.forEach((m) => {
-        if (old != null) this.colorMarker(old, m, color[old.Тип])
-        if (element != null) this.colorMarker(element, m, 'yellow', Points)
+        element.Points.forEach((i) => {
+          if (m._latlng.lat == i.X && m._latlng.lng == i.Y) {
+            L.DomUtil.addClass(m._icon, 'gps_ring')
+            Points.push([i.X, i.Y])
+          }
+        })
       })
 
-      if (element == null || element.Points === undefined || element.Points.length == 0) return
-      // animate: true, duration: 1.5
-      this.map.fitBounds(new L.LatLngBounds(Points), { maxZoom: 10 })
-    },
-
-    colorMarker(element, m, color, arr) {
-      element.Points.forEach((i) => {
-        if (m._latlng.lat == i.X && m._latlng.lng == i.Y) {
-          m.setStyle({ color: color }).bringToFront()
-          if (arr != undefined) arr.push([i.X, i.Y])
-        }
-      })
+      this.map.flyToBounds(new L.LatLngBounds(Points), { maxZoom: this.map.getZoom() })
     },
 
     zoomOut() {
@@ -85,7 +75,21 @@ export default {
     displayMarkers(elements) {
       elements.forEach((element) => {
         element.Points.forEach((i) => {
-          var marker = L.circleMarker([i.X, i.Y], { color: color[element.Тип], radius: 13, fillOpacity: 0.9 })
+          // var marker = L.circleMarker([i.X, i.Y], {
+          //   color: color[this.emergencyStore.colorBy][element[this.emergencyStore.colorBy]],
+          //   radius: 13,
+          //   fillOpacity: 0.9,
+          // })
+          var icon = L.divIcon({
+            html: `<span style="background-color: ${
+              color[this.emergencyStore.colorBy][element[this.emergencyStore.colorBy]]
+            }" class="circle"></span>`,
+            className: '',
+            iconSize: [30, 30],
+          })
+          var marker = L.marker([i.X, i.Y], {
+            icon: icon,
+          })
             .addTo(this.map)
             .on('click', (e) => {
               this.emergencyStore.selectElement(element)
@@ -137,7 +141,14 @@ export default {
       deep: true,
       handler(val, oldVal) {
         if (val == null) this.zoomOut()
-        this.LookAtElement(val, oldVal)
+        this.LookAtElement(val)
+      },
+    },
+    'emergencyStore.colorBy': {
+      deep: true,
+      handler(val, oldVal) {
+        this.deleteMarkers()
+        this.displayMarkers(this.emergencyStore.emergencyList)
       },
     },
   },

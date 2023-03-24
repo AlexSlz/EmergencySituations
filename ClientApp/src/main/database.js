@@ -104,6 +104,8 @@ async function loadPointsList(emergencyList) {
 async function getToken(Login, Password) {
     let result = await axios.post('api/auth', { Login, Password }).then(res => {
         return res.data
+    }).catch(e => {
+        throw new Error(e.response.data || 'Server Error')
     })
     return await result
 }

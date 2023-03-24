@@ -4,6 +4,7 @@ import { ref, watch } from 'vue'
 export const useEmergencyStore = defineStore('emergency', () => {
     const emergencyList = ref([])
     const selectedElement = ref(null)
+    const colorBy = ref('Тип')
 
     const local = localStorage.getItem("emergency")
     if (local) {
@@ -21,5 +22,5 @@ export const useEmergencyStore = defineStore('emergency', () => {
         selectedElement.value = element
     }
 
-    return { emergencyList, selectedElement, selectElement }
+    return { emergencyList, selectedElement, selectElement, colorBy }
 })

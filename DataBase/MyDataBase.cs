@@ -1,7 +1,4 @@
-﻿using EmergencySituations.Model;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Data;
+﻿using System.Data;
 using System.Data.OleDb;
 
 #pragma warning disable CA1416 // Проверка совместимости платформы

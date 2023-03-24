@@ -24,6 +24,9 @@ body {
   @apply bg-slate-400;
 }
 
-.gps_ring {
-  @apply rounded-full bg-red-500 animate-ping h-5 w-5;
+.gps_ring span {
+  @apply rounded-full border-[4px] border-yellow-400;
+}
+.circle {
+  @apply rounded-full table-cell w-[30px] h-[30px] z-20 opacity-95;
 }

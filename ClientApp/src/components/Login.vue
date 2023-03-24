@@ -28,7 +28,7 @@ export default {
           this.ErrorMsg = 'ok'
         })
         .catch((e) => {
-          this.ErrorMsg = e.response.data
+          this.ErrorMsg = e
           this.authStore.logout()
         })
     },
