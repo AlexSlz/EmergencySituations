@@ -5,12 +5,13 @@ import EventList from '@/components/EventList/EventList.vue'
 import MyPanel from '@/components/Panel/PanelBody.vue'
 import Tab from '@/components/Panel/PanelTab.vue'
 import Login from '@/components/Login.vue'
+import ManipulationMenu from './components/ManipulationMenu.vue'
 
 import database from '@/main/database'
 </script>
 
 <template>
-  <MapView class="h-screen z-0 w-full sm:w-[79vw]" ref="Map" />
+  <MapView class="h-screen z-0 w-full sm:w-[70vw]" ref="Map" />
   <MyPanel>
     <Tab name="Події" :selected="true">
       <h1 class="text-center pt-3" v-if="isListLoading">Завантаження списку подій...</h1>
@@ -21,6 +22,7 @@ import database from '@/main/database'
       <Tab v-if="!authStore.isAuth" name="Login"><Login /></Tab>
     </template>
     <template v-else>
+      <Tab name="Add"><ManipulationMenu :tableName="'Надзвичайні ситуації'" /> </Tab>
       <Tab :fullPage="true" name="Admin"></Tab>
       <Tab name="Logout"><button @click="authStore.logout()">Confirm</button></Tab>
     </template>

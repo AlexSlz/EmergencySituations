@@ -1,10 +1,12 @@
-<template lang="">
-  <div v-for="(item, i) in items">
-    <my-input v-model="item.Назва" />
-    <p>{{ item.X.toFixed(3) }} | {{ item.Y.toFixed(3) }}</p>
-    <my-button @click="RemoveItem(i)">Remove</my-button>
+<template>
+  <div class="p-5">
+    <div v-for="(item, i) in items">
+      <input class="input" v-model="item.Назва" />
+      <p>{{ item.X.toFixed(3) }} | {{ item.Y.toFixed(3) }}</p>
+      <button class="input" @click="RemoveItem(i)">Remove</button>
+    </div>
+    <button class="input" @click="AddItem">Add</button>
   </div>
-  <my-button @click="AddItem">Add</my-button>
 </template>
 <script>
 export default {
@@ -18,21 +20,14 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {}
-  },
   methods: {
     AddItem() {
-      console.log(this.currentId)
       this.items.push({ Назва: 'Новий маркер', 'Код нс': this.currentId, X: -1, Y: -1 })
-      this.$emit('UpdateItems', this.items)
     },
     RemoveItem(id) {
       this.items.splice(id, 1)
-      this.$emit('UpdateItems', this.items)
     },
   },
-  emits: ['UpdateItems'],
 }
 </script>
 <style></style>

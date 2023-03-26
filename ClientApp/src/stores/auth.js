@@ -2,25 +2,29 @@ import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
-    const token = ref('')
     const isAuth = ref(false)
+    const userData = ref({})
 
-    const local = localStorage.getItem("token")
+    const local = localStorage.getItem("user")
     if (local) {
-        token.value = local
-        isAuth.value = token.value != ''
+        userData.value = JSON.parse(local)
+        isAuth.value = userData.value.token != ''
     }
 
-    watch(() => token, (state) => {
-        localStorage.setItem('token', state.value)
-        isAuth.value = token.value != ''
-    }, { deep: true })
+    function auth(data, token) {
+        userData.value = data
+        userData.value.token = token
+        localStorage.setItem('user', JSON.stringify(userData.value))
+        isAuth.value = true
+    }
 
     const logout = () => {
-        token.value = ''
+        userData.value = {}
+        localStorage.clear()
+        isAuth.value = false
     }
 
 
 
-    return { token, isAuth, logout }
+    return { userData, isAuth, logout, auth }
 })

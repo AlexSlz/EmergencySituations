@@ -24,8 +24,10 @@ export default {
       database
         .getToken(this.login, this.pass)
         .then((t) => {
-          this.authStore.token = t
           this.ErrorMsg = 'ok'
+          database.getUser(t).then((res) => {
+            this.authStore.auth(res, t)
+          })
         })
         .catch((e) => {
           this.ErrorMsg = e

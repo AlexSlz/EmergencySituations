@@ -39,6 +39,6 @@ export default {
   @apply px-7 py-3 border-b-2 border-neutral-500 hover:border-neutral-400 hover:cursor-pointer;
 }
 img {
-  @apply sm:w-auto w-96 p-1 sm:m-auto;
+  @apply max-w-xs p-1 m-auto;
 }
 </style>

@@ -5,7 +5,7 @@
         <a @click="selectTab(tab)">{{ tab.name }}</a>
       </li>
     </ul>
-    <div class="content">
+    <div class="">
       <slot></slot>
     </div>
   </div>
@@ -33,7 +33,7 @@ export default {
 </script>
 <style scoped>
 .panel {
-  @apply absolute z-20 right-0 top-0 h-full overflow-y-auto bg-neutral-800 min-w-[100%] sm:min-w-[21vw] sm:max-w-sm;
+  @apply absolute z-20 right-0 top-0 h-full overflow-y-auto bg-neutral-800 min-w-[100%] sm:min-w-[30vw] sm:max-w-sm;
 }
 .fold {
   @apply h-auto;
@@ -42,7 +42,7 @@ export default {
   @apply relative overflow-hidden bg-neutral-600 flex justify-center m-2;
 }
 .tabs li {
-  @apply text-center p-2; /*float-left list-item*/
+  @apply text-center p-2 text-base; /*float-left list-item*/
 }
 .active {
   @apply border-emerald-600 border-b-2;
@@ -52,15 +52,5 @@ export default {
 }
 .panel:has(.fullPage) {
   @apply w-full sm:max-w-full;
-}
-
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.5s ease;
-}
-.list-enter-from,
-.list-leave-to {
-  opacity: 0;
-  transform: translateX(30px);
 }
 </style>

@@ -19,5 +19,14 @@ namespace EmergencySituations.Controllers
                 return BadRequest("User Not Found");
             return Token.GenerateToken(user["Логін"].ToString());
         }
+        [HttpGet("{token}")]
+        public ActionResult<string> getUserByToken(string token)
+        {
+            var user = new MyDBContext("Користувачі").FirstOrDefault(u => u["Логін"].ToString() == Token.Decrypt(token));
+            if (user == null)
+                return BadRequest("User Not Found");
+            user.Remove("Пароль");
+            return Ok(user);
+        }
     }
 }

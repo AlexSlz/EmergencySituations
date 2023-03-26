@@ -1,14 +1,9 @@
 import axios from 'axios'
-import color from '@/main/color'
 
 const apiName = 'api/tables'
 
-const RelatedItemsInTables = { 'Рівень': 'Рівень нс', 'Тип': 'Тип нс' }
-
-const HideVisual = ['Додав']
-
 async function getKeys(tableName) {
-    const res = await axios(`${apiName}/getKey/${tableName}`)
+    const res = await axios(`${apiName}/${tableName}/getKey`)
     return await res.data
 }
 
@@ -17,60 +12,8 @@ async function getTableNameList() {
     return await res.data
 }
 
-function setupObject(data, customData) {
-    var dataVisual = { ...data }
-    console.log(data)
-    var dataValue = { ...data }
-    Object.keys(data).forEach(name => {
-        switch (data[name]) {
-            case 'Double':
-            case 'Int32':
-                dataVisual[name] = setupNumber(name)
-                dataValue[name] = 0
-                break;
-            case 'String':
-                if (name == 'Зображення')
-                    dataVisual[name] = { element: 'input', type: 'file', disabled: false }
-                else if (name == 'Опис')
-                    dataVisual[name] = { element: 'textarea', disabled: false }
-                else
-                    dataVisual[name] = { element: 'input', type: 'text', disabled: false }
-                dataValue[name] = ''
-                break
-
-            case 'DateTime':
-                dataValue[name] = getTime()
-                dataVisual[name] = { element: 'input', type: 'datetime-local', disabled: false }
-                break
-            default:
-                dataVisual[name] = { element: dataVisual[name] }
-                dataValue[name] = []
-                break
-        }
-        if (HideVisual.includes(name)) {
-            delete dataVisual[name]
-        }
-        if (name in customData) {
-            dataValue[name] = customData[name]
-        }
-    })
-    return { dataVisual, dataValue }
-}
-
-function setupNumber(name) {
-    let result
-
-    if (name in RelatedItemsInTables) {
-        result = { element: 'combo', table: RelatedItemsInTables[name] }
-    } else {
-        result = { element: 'input', type: 'number', disabled: name == 'Код' }
-    }
-
-    return result
-}
-
 function getLastIdFromTable(tableName) {
-    return axios(`${apiName}/getLastId/${tableName}`).then((res) => res.data)
+    return axios(`${apiName}/${tableName}/getLastId`).then((res) => res.data)
 }
 
 function getDataFromTable(tableName) {
@@ -80,7 +23,6 @@ function getDataFromTable(tableName) {
 
 async function getEmergencyData() {
     var result = await axios(`${apiName}/main`).then((eme) => {
-        console.log(eme.data)
         return eme.data
     })
 
@@ -94,7 +36,7 @@ async function loadPointsList(emergencyList) {
         .then((points) => {
             emergencyList.forEach((element) => {
                 var result = points.data.filter((i) => i['Код нс'] == element.Код)
-                element.Points = result.map(p => ({ ...p, X: p.X, Y: p.Y }))
+                element.Позиції = result.map(p => ({ ...p, X: p.X, Y: p.Y }))
             })
             return emergencyList
         })
@@ -110,6 +52,27 @@ async function getToken(Login, Password) {
     return await result
 }
 
+async function getUser(token) {
+    let result = await axios.get(`api/auth/${token}`).then(res => {
+        return res.data
+    }).catch(e => {
+        throw new Error(e.response.data || 'Server Error')
+    })
+    return await result
+}
+
+import { useAuthStore } from '@/stores/auth'
+async function addToTable(tableName, data) {
+    let authStore = useAuthStore()
+    if (!authStore.isAuth) return 'NotAuth'
+    let result = await axios.post(`api/tables/${tableName}`, data, {
+        headers: { 'token': authStore.userData.token }
+    }).then(res => {
+        return res.data
+    })
+    return await result
+}
+
 export default {
-    getKeys, getTableNameList, setupObject, getDataFromTable, getLastIdFromTable, getEmergencyData, getToken
+    getKeys, getTableNameList, getDataFromTable, getLastIdFromTable, getEmergencyData, getToken, addToTable, getUser
 }

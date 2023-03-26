@@ -46,7 +46,7 @@ export default {
       currentId: 0,
       tableVisual: [],
       tableData: [],
-      customParameter: [{ table: 'Надзвичайні ситуації', child: 'Позиція НС', name: 'Позиції', elementName: 'MarkerList' }],
+      customParameter: [{ table: 'Надзвичайні ситуації', child: 'Позиції НС', name: 'Позиції', elementName: 'MarkerList' }],
     }
   },
   methods: {

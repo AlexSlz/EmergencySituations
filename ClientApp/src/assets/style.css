@@ -28,5 +28,5 @@ body {
   @apply rounded-full border-[4px] border-yellow-400;
 }
 .circle {
-  @apply rounded-full table-cell w-[30px] h-[30px] z-20 opacity-95;
+  @apply rounded-full table-cell w-[30px] h-[30px] z-20 opacity-90 transition-all;
 }

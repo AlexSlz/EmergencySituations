@@ -49,11 +49,11 @@ export default {
       this.markerList.forEach((m) => {
         L.DomUtil.removeClass(m._icon, 'gps_ring')
       })
-      if (element == null || element.Points === undefined || element.Points.length == 0) return
+      if (element == null || element.Позиції === undefined || element.Позиції.length == 0) return
 
       var Points = []
       this.markerList.forEach((m) => {
-        element.Points.forEach((i) => {
+        element.Позиції.forEach((i) => {
           if (m._latlng.lat == i.X && m._latlng.lng == i.Y) {
             L.DomUtil.addClass(m._icon, 'gps_ring')
             Points.push([i.X, i.Y])
@@ -73,8 +73,9 @@ export default {
     },
 
     displayMarkers(elements) {
+      this.deleteMarkers(this.markerList)
       elements.forEach((element) => {
-        element.Points.forEach((i) => {
+        element.Позиції.forEach((i) => {
           // var marker = L.circleMarker([i.X, i.Y], {
           //   color: color[this.emergencyStore.colorBy][element[this.emergencyStore.colorBy]],
           //   radius: 13,
@@ -99,7 +100,7 @@ export default {
       })
     },
     displayNewMarkers(items) {
-      this.deleteMarkers()
+      this.deleteMarkers(this.tempList)
       items.forEach((element) => {
         var pos = this.map.getCenter()
         if (element.X == -1 && element.Y == -1) {
@@ -117,13 +118,13 @@ export default {
       })
     },
 
-    deleteMarkers() {
-      this.tempList.forEach((item) => {
+    deleteMarkers(list) {
+      list.forEach((item) => {
         if (this.map.hasLayer(item)) {
           this.map.removeLayer(item)
         }
       })
-      this.tempList = []
+      list.splice(0, list.length)
     },
   },
   watch: {
@@ -147,8 +148,13 @@ export default {
     'emergencyStore.colorBy': {
       deep: true,
       handler(val, oldVal) {
-        this.deleteMarkers()
         this.displayMarkers(this.emergencyStore.emergencyList)
+      },
+    },
+    'emergencyStore.tempPoints.length': {
+      deep: true,
+      handler(val, oldVal) {
+        if (this.emergencyStore.tempPoints != undefined) this.displayNewMarkers(this.emergencyStore.tempPoints)
       },
     },
   },

@@ -35,7 +35,7 @@ namespace EmergencySituations.Auth
         {
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(key));
         }
-        private static string Decrypt(string key)
+        public static string Decrypt(string key)
         {
             return Encoding.UTF8.GetString(Convert.FromBase64String(key));
         }
