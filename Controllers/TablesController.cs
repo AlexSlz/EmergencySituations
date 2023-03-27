@@ -58,10 +58,29 @@ namespace EmergencySituations.Controllers
         {
             var data = new MyDBContext(json);
 
-            data.ForEach(item =>
+            foreach (var item in data)
             {
-                MyDataBase.AddRow(tableName, item);
-            });
+                if (!MyDataBase.AddRow(tableName, item))
+                {
+                    return BadRequest("Error Data.");
+                }
+            }
+
+            return Ok(new MyDBContext(tableName).Last());
+        }
+
+        [HttpPut("{tableName}")]
+        public IActionResult Put(string tableName, object json)
+        {
+            var data = new MyDBContext(json);
+
+            foreach (var item in data)
+            {
+                if (!MyDataBase.UpdateRow(tableName, item))
+                {
+                    return BadRequest("Error Data.");
+                }
+            }
 
             return Ok();
         }

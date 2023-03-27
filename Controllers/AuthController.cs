@@ -28,5 +28,11 @@ namespace EmergencySituations.Controllers
             user.Remove("Пароль");
             return Ok(user);
         }
+
+        [HttpGet("{token}/check")]
+        public ActionResult<string> checkToken(string token)
+        {
+            return Ok(Token.Validation(token));
+        }
     }
 }

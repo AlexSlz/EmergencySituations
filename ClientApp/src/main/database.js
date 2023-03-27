@@ -73,6 +73,18 @@ async function addToTable(tableName, data) {
     return await result
 }
 
+async function editTable(tableName, data) {
+    let authStore = useAuthStore()
+    if (!authStore.isAuth) return 'NotAuth'
+    let result = await axios.put(`api/tables/${tableName}`, data, {
+        headers: { 'token': authStore.userData.token }
+    }).then(res => {
+        return res.data
+    })
+    return await result
+}
+
 export default {
-    getKeys, getTableNameList, getDataFromTable, getLastIdFromTable, getEmergencyData, getToken, addToTable, getUser
+    getKeys, getTableNameList, getDataFromTable, getLastIdFromTable,
+    getEmergencyData, getToken, addToTable, getUser, editTable
 }

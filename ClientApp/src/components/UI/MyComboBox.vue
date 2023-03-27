@@ -1,10 +1,10 @@
 <template>
   <select :value="modelValue" @change="changeCombo" class="combo">
-    <option class="text-neutral-700" :value="i" v-for="(item, i) in itemsVisual">{{ item }}</option>
+    <option class="text-neutral-700" :value="i + 1" v-for="(item, i) in itemsVisual">{{ item }}</option>
   </select>
 </template>
 <script>
-import database from '../../main/database'
+import database from '@/main/database'
 export default {
   name: 'my-combo',
   props: {
@@ -27,11 +27,9 @@ export default {
     changeCombo(e) {
       this.$emit('update:modelValue', e.target.value)
     },
-    checkValue(val) {
-      if (typeof val != 'number') {
-        return this.itemsVisual.indexOf(val)
-      } else {
-        return val
+    checkValue() {
+      if (typeof this.modelValue != 'number') {
+        this.$emit('update:modelValue', this.itemsVisual.indexOf(this.modelValue) + 1)
       }
     },
   },
@@ -42,6 +40,7 @@ export default {
         if (val != undefined) {
           database.getDataFromTable(this.tableName).then((i) => {
             this.itemsVisual = i.map((a) => a.Назва)
+            this.checkValue()
           })
         }
       },

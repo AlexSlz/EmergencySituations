@@ -1,7 +1,7 @@
 const RelatedItemsInTables = { 'Рівень': 'Рівень нс', 'Тип': 'Тип нс' }
 
-const HideVisual = []
-const disabledVisual = ['Код', 'Додав']
+const HideVisual = ['Код', 'Додав']
+const disabledVisual = []
 const customElements = {
     'Зображення': { element: 'input', type: 'file', disabled: false },
     'Опис': { element: 'textarea', disabled: false }
@@ -18,7 +18,7 @@ function setupObject(data, customValue) {
             case 'Int32':
             case 'Int64':
                 dataVisual[name] = setupNumber(name)
-                dataValue[name] = 0
+                dataValue[name] = 1
                 break;
             case 'String':
                 dataVisual[name] = { element: 'input', type: 'text', disabled: false }

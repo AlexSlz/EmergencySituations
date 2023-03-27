@@ -49,8 +49,13 @@ namespace EmergencySituations.DataBase
 
         public static bool UpdateRow(string tableName, Dictionary<string, object> data)
         {
+            if(!data.TryGetValue("Код", out var Key))
+            {
+                return AddRow(tableName, data);
+            }
+            data.Remove("Код");
             var temp = GetValue(data, tableName, true);
-            string q = $"UPDATE [{tableName}] SET {String.Join(", ", temp.ToArray())} WHERE [Код] = {data["Код"]}";
+            string q = $"UPDATE [{tableName}] SET {String.Join(", ", temp.ToArray())} WHERE [Код] = {Key}";
             return ExecuteQuery(q);
         }
 

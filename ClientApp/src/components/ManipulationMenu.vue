@@ -1,14 +1,5 @@
-<script setup>
-import MarkerList from '@/components/MarkerList.vue'
-import { useEmergencyStore } from '@/stores/emergency'
-import database from '@/main/database'
-import formManager from '@/main/formInit'
-import { useAuthStore } from '@/stores/auth'
-</script>
-
 <template>
-  <button class="input" @click="loadForm()">TeSt</button>
-  <form @submit.prevent>
+  <div>
     <div v-for="item in Object.keys(tableVisual)">
       <h1>{{ item }}</h1>
 
@@ -33,10 +24,18 @@ import { useAuthStore } from '@/stores/auth'
       ></textarea>
       <MarkerList :items="this.emergencyStore.tempPoints" v-if="tableVisual[item].element == 'Points'" :currentId="currentId" />
     </div>
-    <button class="input" @click="addData()" type="submit">OK</button>
-  </form>
+    <button class="input" @click="emergencyStore.selectedElement != null ? editData() : addData()">OK</button>
+    <button class="input" @click="editmenu.show = false">Cancel</button>
+  </div>
 </template>
 <script>
+import MarkerList from '@/components/MarkerList.vue'
+import { useEmergencyStore } from '@/stores/emergency'
+import database from '@/main/database'
+import formManager from '@/main/formInit'
+import { useAuthStore } from '@/stores/auth'
+import { useMenuStore } from '@/stores/editMenu'
+
 export default {
   props: {
     tableName: {
@@ -50,9 +49,28 @@ export default {
       tableData: [],
       emergencyStore: useEmergencyStore(),
       authStore: useAuthStore(),
+      editmenu: useMenuStore(),
     }
   },
   methods: {
+    editData() {
+      var temp = { ...this.tableData }
+      if ('Позиції' in temp) {
+        delete temp['Позиції']
+      }
+      database
+        .editTable(this.tableName, temp)
+        .then((e) => {
+          console.log(e)
+          if (this.tableName == 'Надзвичайні ситуації') {
+            this.emergencyStore.tempPoints.map((i) => (i['Код нс'] = temp['Код']))
+            database.editTable('Позиції НС', this.emergencyStore.tempPoints)
+          }
+        })
+        .catch((e) => {
+          console.log(e)
+        })
+    },
     addData() {
       var temp = { ...this.tableData }
       delete temp.Код
@@ -60,14 +78,13 @@ export default {
       if ('Позиції' in temp) {
         delete temp['Позиції']
       }
-      console.log(temp)
       database
         .addToTable(this.tableName, temp)
         .then((e) => {
           if (this.tableName == 'Надзвичайні ситуації') {
+            this.emergencyStore.tempPoints.map((i) => (i['Код нс'] = e.Код))
             database.addToTable('Позиції НС', this.emergencyStore.tempPoints)
           }
-          console.log(e)
         })
         .catch((e) => {})
     },
@@ -75,10 +92,12 @@ export default {
       database.getLastIdFromTable(this.tableName).then((id) => {
         this.currentId = id + 1
         database.getKeys(this.tableName).then((res) => {
+          var temp = { Код: this.currentId }
           if (this.tableName == 'Надзвичайні ситуації') {
             res.Позиції = 'Points'
+            if (this.emergencyStore.selectedElement != null) temp = this.emergencyStore.selectedElement
           }
-          var data = formManager.setupObject(res, this.emergencyStore.selectedElement || { Код: this.currentId })
+          var data = formManager.setupObject(res, temp)
           this.tableVisual = data.dataVisual
           this.tableData = data.dataValue
           if (this.tableName == 'Надзвичайні ситуації') {
@@ -90,8 +109,6 @@ export default {
       })
     },
   },
-  mounted() {
-    //this.loadForm()
-  },
+  components: { MarkerList },
 }
 </script>

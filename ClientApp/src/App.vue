@@ -22,8 +22,18 @@ import database from '@/main/database'
       <Tab v-if="!authStore.isAuth" name="Login"><Login /></Tab>
     </template>
     <template v-else>
-      <Tab name="Add"><ManipulationMenu :tableName="'Надзвичайні ситуації'" /> </Tab>
-      <Tab :fullPage="true" name="Admin"></Tab>
+      <Tab
+        :openByDefault="true"
+        v-if="editmenu.show"
+        @ifMount="this.$refs.EditMenu.loadForm()"
+        @ifUnMount="unLoadForm"
+        :name="editmenu.name"
+      >
+        <ManipulationMenu ref="EditMenu" :tableName="'Надзвичайні ситуації'" />
+      </Tab>
+      <Tab :fullPage="true" name="Admin">
+        <button @click="editmenu.open('Add')">{{ editmenu.show }}</button>
+      </Tab>
       <Tab name="Logout"><button @click="authStore.logout()">Confirm</button></Tab>
     </template>
   </MyPanel>
@@ -32,38 +42,51 @@ import database from '@/main/database'
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useEmergencyStore } from './stores/emergency'
+import { useMenuStore } from './stores/editMenu'
 import Notation from './components/Notation.vue'
+import axios from 'axios'
 export default {
   data() {
     return {
-      isListLoading: true,
+      isListLoading: false,
       authStore: useAuthStore(),
       emergencyStore: useEmergencyStore(),
+      editmenu: useMenuStore(),
     }
   },
   methods: {
+    unLoadForm() {
+      this.emergencyStore.tempPoints = []
+    },
     Logout() {
-      console.log('a')
       this.authStore.logout()
     },
     loadEmergency() {
+      this.isListLoading = true
       database
         .getEmergencyData()
         .then((e) => {
           this.emergencyStore.emergencyList = e
         })
-        .catch((e) => {
-          console.log(e)
-        })
+        .catch((e) => {})
         .finally((e) => {
           this.isListLoading = false
         })
     },
   },
   beforeMount() {
-    if (this.emergencyStore.emergencyList != []) {
+    if (this.emergencyStore.emergencyList == []) {
       this.loadEmergency()
     }
+    if (this.authStore.isAuth)
+      axios
+        .get(`api/auth/${this.authStore.userData.token}/check`)
+        .then((res) => {
+          if (!res.data) this.Logout()
+        })
+        .catch((e) => {
+          this.Logout()
+        })
   },
   components: { Notation },
 }
