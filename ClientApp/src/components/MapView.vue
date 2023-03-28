@@ -132,7 +132,6 @@ export default {
       immediate: true,
       deep: true,
       handler(val, oldVal) {
-        console.log(val)
         setTimeout(() => {
           this.displayMarkers(val)
         })

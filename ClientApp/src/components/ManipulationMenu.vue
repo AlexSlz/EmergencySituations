@@ -4,7 +4,6 @@
       <h1>{{ item }}</h1>
 
       <input
-        class="input"
         v-model="tableData[item]"
         v-if="tableVisual[item].element == 'input'"
         :type="tableVisual[item].type"
@@ -17,15 +16,14 @@
         :disabled="tableVisual[item].disabled"
       />
       <textarea
-        class="input"
         v-model="tableData[item]"
         v-if="tableVisual[item].element == 'textarea'"
         :disabled="tableVisual[item].disabled"
       ></textarea>
       <MarkerList :items="this.emergencyStore.tempPoints" v-if="tableVisual[item].element == 'Points'" :currentId="currentId" />
     </div>
-    <button class="input" @click="emergencyStore.selectedElement != null ? editData() : addData()">OK</button>
-    <button class="input" @click="editmenu.show = false">Cancel</button>
+    <button @click="emergencyStore.selectedElement != null ? editData() : addData()">OK</button>
+    <button @click="editmenu.show = false">Cancel</button>
   </div>
 </template>
 <script>
@@ -55,16 +53,26 @@ export default {
   methods: {
     editData() {
       var temp = { ...this.tableData }
+      console.log(temp)
       if ('Позиції' in temp) {
         delete temp['Позиції']
       }
       database
         .editTable(this.tableName, temp)
         .then((e) => {
-          console.log(e)
           if (this.tableName == 'Надзвичайні ситуації') {
             this.emergencyStore.tempPoints.map((i) => (i['Код нс'] = temp['Код']))
-            database.editTable('Позиції НС', this.emergencyStore.tempPoints)
+            let difference = this.emergencyStore.selectedElement.Позиції.filter((x) => {
+              var re = !this.emergencyStore.tempPoints.some((y) => y.Код == x.Код)
+              return re
+            })
+            if (difference.length > 0) {
+              database.deleteData('Позиції НС', difference)
+            }
+
+            database.editTable('Позиції НС', this.emergencyStore.tempPoints).then((e) => {
+              this.editmenu.show = false
+            })
           }
         })
         .catch((e) => {
@@ -73,6 +81,7 @@ export default {
     },
     addData() {
       var temp = { ...this.tableData }
+      console.log(temp)
       delete temp.Код
 
       if ('Позиції' in temp) {
@@ -82,8 +91,11 @@ export default {
         .addToTable(this.tableName, temp)
         .then((e) => {
           if (this.tableName == 'Надзвичайні ситуації') {
-            this.emergencyStore.tempPoints.map((i) => (i['Код нс'] = e.Код))
-            database.addToTable('Позиції НС', this.emergencyStore.tempPoints)
+            this.emergencyStore.tempPoints.map((i) => (i['Код нс'] = e[0].Код))
+
+            database.addToTable('Позиції НС', this.emergencyStore.tempPoints).then((e) => {
+              this.editmenu.show = false
+            })
           }
         })
         .catch((e) => {})

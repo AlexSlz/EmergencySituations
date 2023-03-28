@@ -1,5 +1,5 @@
 <template>
-  <select :value="modelValue" @change="changeCombo" class="combo">
+  <select :value="modelValue" @change="changeCombo">
     <option class="text-neutral-700" :value="i + 1" v-for="(item, i) in itemsVisual">{{ item }}</option>
   </select>
 </template>

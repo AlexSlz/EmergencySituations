@@ -2,11 +2,14 @@
 using System.Data.OleDb;
 
 #pragma warning disable CA1416 // Проверка совместимости платформы
+
 namespace EmergencySituations.DataBase
 {
     public static class MyDataBase
     {
         private static OleDbConnection _conn = null;
+
+        public static bool NeedUpdateData = false;
 
         public static void Connect(string fileName)
         {

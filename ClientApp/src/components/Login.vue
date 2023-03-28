@@ -1,9 +1,9 @@
 <template>
   <p class="p-2 text-rose-600">{{ ErrorMsg }}</p>
   <form @submit.prevent="auth()">
-    <input class="input" type="text" placeholder="Login" v-model="login" />
-    <input class="input" type="password" placeholder="Password" v-model="pass" />
-    <input class="input" type="submit" />
+    <input type="text" placeholder="Login" v-model="login" />
+    <input type="password" placeholder="Password" v-model="pass" />
+    <input type="submit" />
   </form>
 </template>
 <script>

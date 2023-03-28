@@ -1,25 +1,38 @@
 <template>
   <div>
     <slot></slot>
-    <h1 class="break-all mt-5">{{ selectedElement.Назва }}</h1>
-    <button v-if="authStore.isAuth" class="input" @click="editmenu.open('Edit', true)">Edit</button>
+    <h1 class="break-all mt-5">{{ this.emergencyStore.selectedElement.Назва }}</h1>
+    <template v-if="authStore.isAuth">
+      <button v-if="authStore.isAuth" @click="editmenu.open('Edit', true)">Edit</button>
+      <button @click="deleteData">Delete</button>
+    </template>
   </div>
 </template>
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useMenuStore } from '@/stores/editMenu'
+import { useEmergencyStore } from '@/stores/emergency'
+import database from '@/main/database'
 export default {
-  props: {
-    selectedElement: {
-      type: Object,
-      required: true,
-    },
-  },
   data() {
     return {
       authStore: useAuthStore(),
       editmenu: useMenuStore(),
+      emergencyStore: useEmergencyStore(),
     }
+  },
+  methods: {
+    deleteData() {
+      database
+        .deleteData('Надзвичайні ситуації', this.emergencyStore.selectedElement)
+        .then((e) => {
+          this.emergencyStore.selectElement(null)
+          this.emergencyStore.needUpdate.extra = true
+        })
+        .catch((e) => {
+          console.log(e)
+        })
+    },
   },
 }
 </script>

@@ -1,11 +1,11 @@
 <template>
   <div class="p-5">
     <div v-for="(item, i) in items">
-      <input class="input" v-model="item.Назва" />
+      <input v-model="item.Назва" />
       <p>{{ item.X.toFixed(3) }} | {{ item.Y.toFixed(3) }}</p>
-      <button class="input" @click="RemoveItem(i)">Remove</button>
+      <button @click="RemoveItem(i)">Remove</button>
     </div>
-    <button class="input" @click="AddItem">Add</button>
+    <button @click="AddItem">Add</button>
   </div>
 </template>
 <script>

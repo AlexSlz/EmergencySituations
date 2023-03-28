@@ -1,5 +1,5 @@
 <template>
-  <select v-model="emergencyStore.colorBy" class="input" name="select">
+  <select v-model="emergencyStore.colorBy" name="select">
     <!--Supplement an id here instead of using 'name'-->
     <option class="text-neutral-800" :value="item" v-for="item in Object.keys(color)">{{ item }}</option>
   </select>

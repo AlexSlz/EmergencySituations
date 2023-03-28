@@ -13,7 +13,7 @@ import database from '@/main/database'
 <template>
   <MapView class="h-screen z-0 w-full sm:w-[70vw]" ref="Map" />
   <MyPanel>
-    <Tab name="Події" :selected="true">
+    <Tab name="Події" @ifActive="checkUpdateImportance" :selected="true">
       <h1 class="text-center pt-3" v-if="isListLoading">Завантаження списку подій...</h1>
       <EventList ref="List" v-if="!isListLoading" />
     </Tab>
@@ -52,14 +52,23 @@ export default {
       authStore: useAuthStore(),
       emergencyStore: useEmergencyStore(),
       editmenu: useMenuStore(),
+      oldInformation: false,
     }
   },
   methods: {
     unLoadForm() {
       this.emergencyStore.tempPoints = []
+      this.loadEmergency()
+      //this.emergencyStore.selectElement(null)
     },
     Logout() {
       this.authStore.logout()
+    },
+    checkUpdateImportance() {
+      if (new Date(this.emergencyStore.needUpdate.lastUpdate) >= new Date() - 10 || this.emergencyStore.needUpdate.extra) {
+        this.loadEmergency()
+        this.emergencyStore.needUpdate.extra = false
+      }
     },
     loadEmergency() {
       this.isListLoading = true
@@ -68,16 +77,20 @@ export default {
         .then((e) => {
           this.emergencyStore.emergencyList = e
         })
-        .catch((e) => {})
+        .catch((e) => {
+          console.log(e)
+        })
         .finally((e) => {
           this.isListLoading = false
+
+          let next = new Date()
+          next.setMinutes(next.getMinutes() + 1)
+          this.emergencyStore.needUpdate.lastUpdate = next
         })
     },
   },
   beforeMount() {
-    if (this.emergencyStore.emergencyList == []) {
-      this.loadEmergency()
-    }
+    //this.loadEmergency()
     if (this.authStore.isAuth)
       axios
         .get(`api/auth/${this.authStore.userData.token}/check`)

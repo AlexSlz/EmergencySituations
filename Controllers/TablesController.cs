@@ -1,8 +1,10 @@
 ﻿using EmergencySituations.Auth;
 using EmergencySituations.DataBase;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Drawing;
+using System.Drawing.Printing;
 
 namespace EmergencySituations.Controllers
 {
@@ -12,14 +14,15 @@ namespace EmergencySituations.Controllers
     {
         [AuthFilter(new string[] {"Користувачі"})]
         [HttpGet("{tableName}")]
-        public ActionResult<string> GetTable(string tableName)
+        public ActionResult<string> GetTable(string tableName, int id = 0, int limit = 999999)
         {
             var a = new MyDBContext(tableName);
-            return Ok(a);
+            var find = a.FirstOrDefault(i => i["Код"].ToString() == id.ToString());
+            return Ok((find != null) ? find : a.Take(limit));
         }
 
         [HttpGet("main")]
-        public ActionResult<string> GetMainTable()
+        public ActionResult<string> GetMainTable(int limit = 0, int page = 1)
         {
             var a = new MyDBContext("Надзвичайні ситуації");
             var type = new MyDBContext("Тип НС");
@@ -29,7 +32,15 @@ namespace EmergencySituations.Controllers
                 item["Тип"] = type.FindById(item["Тип"])["Назва"];
                 item["Рівень"] = level.FindById(item["Рівень"])["Назва"];
             }
-            return Ok(a);
+            if (limit > 0)
+            {
+                return Ok(a.Skip((page - 1) * limit)
+                      .Take(limit));
+            }
+            else
+            {
+                return Ok(a);
+            }
         }
 
         [HttpGet("{tableName}/getLastId")]
@@ -66,9 +77,10 @@ namespace EmergencySituations.Controllers
                 }
             }
 
-            return Ok(new MyDBContext(tableName).Last());
+            return (data.Count <= 0) ? Ok() : Ok(data.Update(tableName));
         }
 
+        [AuthFilter]
         [HttpPut("{tableName}")]
         public IActionResult Put(string tableName, object json)
         {
@@ -77,6 +89,23 @@ namespace EmergencySituations.Controllers
             foreach (var item in data)
             {
                 if (!MyDataBase.UpdateRow(tableName, item))
+                {
+                    return BadRequest("Error Data.");
+                }
+            }
+
+            return (data.Count <= 0) ? Ok() : Ok(data.Update(tableName));
+        }
+
+        [AuthFilter]
+        [HttpDelete("{tableName}")]
+        public IActionResult Delete(string tableName, object json)
+        {
+            var data = new MyDBContext(json);
+
+            foreach (var item in data)
+            {
+                if (!MyDataBase.DeleteRowById(tableName, int.Parse(item["Код"].ToString())))
                 {
                     return BadRequest("Error Data.");
                 }

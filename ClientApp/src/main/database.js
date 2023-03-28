@@ -22,13 +22,12 @@ function getDataFromTable(tableName) {
 
 
 async function getEmergencyData() {
-    var result = await axios(`${apiName}/main`).then((eme) => {
+    var data = await axios(`${apiName}/main`).then((eme) => {
         return eme.data
     })
 
-    result = await loadPointsList(result)
-
-    return await result
+    data = await loadPointsList(data)
+    return await data
 }
 
 async function loadPointsList(emergencyList) {
@@ -84,7 +83,19 @@ async function editTable(tableName, data) {
     return await result
 }
 
+async function deleteData(tableName, data) {
+    let authStore = useAuthStore()
+    if (!authStore.isAuth) return 'NotAuth'
+    let result = await axios.delete(`api/tables/${tableName}`, {
+        headers: { 'token': authStore.userData.token },
+        data: data
+    }).then(res => {
+        return res.data
+    })
+    return await result
+}
+
 export default {
     getKeys, getTableNameList, getDataFromTable, getLastIdFromTable,
-    getEmergencyData, getToken, addToTable, getUser, editTable
+    getEmergencyData, getToken, addToTable, getUser, editTable, deleteData
 }

@@ -33,10 +33,12 @@ export default {
       handler(val, oldVal) {
         if (this.isActive) {
           this.$emit('ifActive')
+        } else {
+          this.$emit('ifNotActive')
         }
       },
     },
   },
-  emits: ['ifActive', 'ifMount', 'ifUnMount'],
+  emits: ['ifActive', 'ifNotActive', 'ifMount', 'ifUnMount'],
 }
 </script>
