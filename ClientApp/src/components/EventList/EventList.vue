@@ -35,7 +35,12 @@ export default {
     }
 
     var obs = new IntersectionObserver((e, o) => {
-      if (e[0].isIntersecting && this.emergencyStore.selectedElement == null) this.itemsCount += this.itemsLimit
+      if (e[0].isIntersecting && this.emergencyStore.selectedElement == null) {
+        this.itemsCount += this.itemsLimit
+        if (this.itemsCount > this.emergencyStore.emergencyList.length) {
+          this.itemsCount = this.emergencyStore.emergencyList.length
+        }
+      }
     }, options)
     obs.observe(this.$refs.obs)
   },

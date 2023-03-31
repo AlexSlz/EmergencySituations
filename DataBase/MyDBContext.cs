@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace EmergencySituations.DataBase
 {
@@ -11,18 +12,29 @@ namespace EmergencySituations.DataBase
             Load();
         }
 
-        public MyDBContext(object data, string tableName = "")
+        public MyDBContext(object data)
         {
+            List<Dictionary<string, object>> temp = new List<Dictionary<string, object>>();
             try
             {
                 var i = JsonConvert.DeserializeObject<Dictionary<string, object>>(data.ToString());
-                this.Add(i);
+                temp.Add(i);
             }
             catch
             {
                 var i = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(data.ToString());
-                this.AddRange(i);
+                temp.AddRange(i);
             }
+
+            temp.ForEach(t =>
+            {
+                if (t.ContainsKey("_value"))
+                {
+                    this.Add(JsonConvert.DeserializeObject<Dictionary<string, object>>(t["_value"].ToString()));
+                }
+            });
+            if(this.Count <= 0)
+            this.AddRange(temp);
         }
 
         private void Load()

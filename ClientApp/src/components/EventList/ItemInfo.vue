@@ -23,15 +23,23 @@ export default {
   },
   methods: {
     deleteData() {
-      database
-        .deleteData('Надзвичайні ситуації', this.emergencyStore.selectedElement)
+      this.emergencyStore
+        .removeSelected()
         .then((e) => {
-          this.emergencyStore.selectElement(null)
-          this.emergencyStore.needUpdate.extra = true
+          console.log(e)
         })
         .catch((e) => {
           console.log(e)
         })
+      // database
+      //   .deleteData('Надзвичайні ситуації', this.emergencyStore.selectedElement)
+      //   .then((e) => {
+      //     this.emergencyStore.selectElement(null)
+      //     this.emergencyStore.needUpdate.extra = true
+      //   })
+      //   .catch((e) => {
+      //     console.log(e)
+      //   })
     },
   },
 }

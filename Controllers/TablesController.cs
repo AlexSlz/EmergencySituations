@@ -101,6 +101,7 @@ namespace EmergencySituations.Controllers
         [HttpDelete("{tableName}")]
         public IActionResult Delete(string tableName, object json)
         {
+            
             var data = new MyDBContext(json);
 
             foreach (var item in data)

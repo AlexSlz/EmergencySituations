@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
+import database from '@/main/database'
 
 export const useEmergencyStore = defineStore('emergency', () => {
     const emergencyList = ref([])
@@ -36,5 +37,16 @@ export const useEmergencyStore = defineStore('emergency', () => {
         selectedElement.value = element
     }
 
-    return { emergencyList, needUpdate, selectedElement, selectElement, colorBy, tempPoints }
+    async function removeSelected() {
+        let result = await database.deleteData('Надзвичайні ситуації', selectedElement.value).then((res) => {
+            let index = emergencyList.value.indexOf(selectedElement.value)
+            if (index > -1)
+                emergencyList.value.splice(index, 1)
+            selectElement(null)
+            return 'Successfully.'
+        })
+        return await result
+    }
+
+    return { emergencyList, needUpdate, selectedElement, selectElement, colorBy, tempPoints, removeSelected }
 })
