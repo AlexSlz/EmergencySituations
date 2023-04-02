@@ -3,7 +3,7 @@ const RelatedItemsInTables = { 'Рівень': 'Рівень нс', 'Тип': '�
 const HideVisual = ['Код', 'Додав']
 const disabledVisual = []
 const customElements = {
-    'Зображення': { element: 'input', type: 'file', disabled: false },
+    'Зображення': { element: 'file', disabled: false },
     'Опис': { element: 'textarea', disabled: false }
 }
 

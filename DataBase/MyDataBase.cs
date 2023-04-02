@@ -9,8 +9,6 @@ namespace EmergencySituations.DataBase
     {
         private static OleDbConnection _conn = null;
 
-        public static bool NeedUpdateData = false;
-
         public static void Connect(string fileName)
         {
             string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);

@@ -2,6 +2,9 @@
   <div>
     <slot></slot>
     <h1 class="break-all mt-5">{{ this.emergencyStore.selectedElement.Назва }}</h1>
+
+    <p>{{ getPosition() }}</p>
+
     <template v-if="authStore.isAuth">
       <button v-if="authStore.isAuth" @click="editmenu.open('Edit', true)">Edit</button>
       <button @click="deleteData">Delete</button>
@@ -22,6 +25,11 @@ export default {
     }
   },
   methods: {
+    getPosition() {
+      let res = this.emergencyStore.selectedElement.Позиції.map((i) => i.Розташування)
+      res = [...new Set(res)]
+      return res.join(', ')
+    },
     deleteData() {
       this.emergencyStore
         .removeSelected()

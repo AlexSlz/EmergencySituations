@@ -95,7 +95,23 @@ async function deleteData(tableName, data) {
     return await result
 }
 
+async function loadFile(tableName, file, fileName) {
+
+    let form = new FormData()
+    form.append('file', file)
+    let result = await axios.post(`api/file/${tableName}/${fileName}`, form, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    }).then(res => {
+        editTable(tableName, { Код: fileName, Зображення: res.data })
+        return res.data
+    })
+    return await result
+}
+
 export default {
     getKeys, getTableNameList, getDataFromTable, getLastIdFromTable,
-    getEmergencyData, getToken, addToTable, getUser, editTable, deleteData
+    getEmergencyData, getToken, addToTable, getUser, editTable, deleteData,
+    loadFile
 }

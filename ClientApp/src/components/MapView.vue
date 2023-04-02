@@ -6,6 +6,7 @@
 import { useEmergencyStore } from '@/stores/emergency'
 import color from '@/main/color'
 import L from 'leaflet'
+import geo from '@/main/geo'
 
 export default {
   props: {
@@ -109,10 +110,13 @@ export default {
         }
         var temp = L.marker([element.X, element.Y], { draggable: true, autoPan: true })
           .addTo(this.map)
-          .on('drag', function (e) {
+          .on('dragend', function (e) {
             var position = e.target.getLatLng()
             element.X = position.lat
             element.Y = position.lng
+            geo(position.lat, position.lng).then((d) => {
+              element.Розташування = d
+            })
           })
         this.tempList.push(temp)
       })

@@ -23,6 +23,7 @@ export default {
   },
   methods: {
     getImage(id) {
+      console.log('a')
       if (id != '') return `${window.location.origin}/api/file/Надзвичайні ситуації/${id}`
     },
     getTime(time) {
