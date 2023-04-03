@@ -32,7 +32,7 @@ import database from '@/main/database'
         <ManipulationMenu ref="EditMenu" :tableName="'Надзвичайні ситуації'" />
       </Tab>
       <Tab :fullPage="true" name="Admin">
-        <button @click="editmenu.open('Add')">{{ editmenu.show }}</button>
+        <Admin />
       </Tab>
       <Tab name="Logout"><button @click="authStore.logout()">Confirm</button></Tab>
     </template>
@@ -45,6 +45,7 @@ import { useEmergencyStore } from './stores/emergency'
 import { useMenuStore } from './stores/editMenu'
 import Notation from './components/Notation.vue'
 import axios from 'axios'
+import Admin from './components/AdminMenu/Admin.vue'
 export default {
   data() {
     return {
@@ -101,6 +102,6 @@ export default {
           this.Logout()
         })
   },
-  components: { Notation },
+  components: { Notation, Admin },
 }
 </script>

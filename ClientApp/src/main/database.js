@@ -2,25 +2,6 @@ import axios from 'axios'
 
 const apiName = 'api/tables'
 
-async function getKeys(tableName) {
-    const res = await axios(`${apiName}/${tableName}/getKey`)
-    return await res.data
-}
-
-async function getTableNameList() {
-    const res = await axios(`${apiName}/getTableNameList`)
-    return await res.data
-}
-
-function getLastIdFromTable(tableName) {
-    return axios(`${apiName}/${tableName}/getLastId`).then((res) => res.data)
-}
-
-function getDataFromTable(tableName) {
-    return axios(`${apiName}/${tableName}`).then((res) => res.data)
-}
-
-
 async function getEmergencyData() {
     var data = await axios(`${apiName}/main`).then((eme) => {
         return eme.data
@@ -83,6 +64,29 @@ async function editTable(tableName, data) {
     return await result
 }
 
+async function getDataFromTable(tableName) {
+    let authStore = useAuthStore()
+    return await axios(`${apiName}/${tableName}`, {
+        headers: { 'token': authStore.userData.token }
+    }).then((res) => res.data)
+}
+
+async function getKeys(tableName) {
+    let authStore = useAuthStore()
+    const res = await axios(`${apiName}/${tableName}/getKey`, {
+        headers: { 'token': authStore.userData.token }
+    })
+    return await res.data
+}
+
+async function getTableNameList() {
+    let authStore = useAuthStore()
+    const res = await axios(`${apiName}/getTableNameList`, {
+        headers: { 'token': authStore.userData.token }
+    })
+    return await res.data
+}
+
 async function deleteData(tableName, data) {
     let authStore = useAuthStore()
     if (!authStore.isAuth) return 'NotAuth'
@@ -111,7 +115,7 @@ async function loadFile(tableName, file, fileName) {
 }
 
 export default {
-    getKeys, getTableNameList, getDataFromTable, getLastIdFromTable,
+    getKeys, getTableNameList, getDataFromTable,
     getEmergencyData, getToken, addToTable, getUser, editTable, deleteData,
     loadFile
 }

@@ -50,6 +50,7 @@ namespace EmergencySituations.Controllers
             return Ok(data.GetMaxId());
         }
 
+        [AuthFilter]
         [HttpGet("{tableName}/getKey")]
         public IActionResult GetKey(string tableName)
         {

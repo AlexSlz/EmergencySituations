@@ -131,25 +131,23 @@ export default {
     },
     loadForm() {
       this.process = false
-      database.getLastIdFromTable(this.tableName).then((id) => {
-        this.currentId = id + 1
-        database.getKeys(this.tableName).then((res) => {
-          var temp = { Код: this.currentId }
-          if (this.tableName == 'Надзвичайні ситуації') {
-            res.Позиції = 'Points'
-            if (this.emergencyStore.selectedElement != null) {
-              temp = this.emergencyStore.selectedElement
-            }
+
+      database.getKeys(this.tableName).then((res) => {
+        var temp = { Код: this.currentId }
+        if (this.tableName == 'Надзвичайні ситуації') {
+          res.Позиції = 'Points'
+          if (this.emergencyStore.selectedElement != null) {
+            temp = this.emergencyStore.selectedElement
           }
-          var data = formManager.setupObject(res, temp)
-          this.tableVisual = data.dataVisual
-          this.tableData = data.dataValue
-          if (this.tableName == 'Надзвичайні ситуації') {
-            this.emergencyStore.tempPoints = JSON.parse(JSON.stringify(data.dataValue.Позиції))
-            this.tableData.Додав = this.authStore.userData.Код
-          }
-          console.log(this.tableData, this.tableVisual)
-        })
+        }
+        var data = formManager.setupObject(res, temp)
+        this.tableVisual = data.dataVisual
+        this.tableData = data.dataValue
+        if (this.tableName == 'Надзвичайні ситуації') {
+          this.emergencyStore.tempPoints = JSON.parse(JSON.stringify(data.dataValue.Позиції))
+          this.tableData.Додав = this.authStore.userData.Код
+        }
+        console.log(this.tableData, this.tableVisual)
       })
     },
   },
