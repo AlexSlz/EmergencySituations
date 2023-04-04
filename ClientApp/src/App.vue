@@ -28,8 +28,9 @@ import database from '@/main/database'
         @ifMount="this.$refs.EditMenu.loadForm()"
         @ifUnMount="unLoadForm"
         :name="editmenu.name"
+        :fullPage="editmenu.fullPage"
       >
-        <ManipulationMenu ref="EditMenu" :tableName="'Надзвичайні ситуації'" />
+        <ManipulationMenu :selectedElement="editmenu.selectedElement" ref="EditMenu" :tableName="editmenu.table" />
       </Tab>
       <Tab :fullPage="true" name="Admin">
         <Admin />

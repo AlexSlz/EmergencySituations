@@ -1,9 +1,15 @@
 <template>
-  <button class="mb-5" @click="editmenu.open('Add')">Add New Emergency</button>
+  <button class="mb-5" @click="editmenu.open()">Add New Emergency</button>
   <div class="p-2">
     <my-combo class="w-56 m-3" v-model="tableId" :items="tableNameList" />
     <MyTable :tableName="tableNameList[tableId - 1]" />
-    <button @click="editmenu.open('Add')">Додати поле до таблиці {{ tableNameList[tableId - 1] }}</button>
+    <button
+      @click="
+        editmenu.open({ table: tableNameList[tableId - 1], fullPage: tableNameList[tableId - 1] != 'Надзвичайні ситуації' })
+      "
+    >
+      Додати поле до таблиці {{ tableNameList[tableId - 1] }}
+    </button>
   </div>
 </template>
 <script>

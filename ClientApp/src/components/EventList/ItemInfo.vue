@@ -6,7 +6,9 @@
     <p>{{ getPosition() }}</p>
 
     <template v-if="authStore.isAuth">
-      <button v-if="authStore.isAuth" @click="editmenu.open('Edit', true)">Edit</button>
+      <button v-if="authStore.isAuth" @click="editmenu.open({ name: 'Edit', element: emergencyStore.selectedElement })">
+        Edit
+      </button>
       <button @click="deleteData">Delete</button>
     </template>
   </div>

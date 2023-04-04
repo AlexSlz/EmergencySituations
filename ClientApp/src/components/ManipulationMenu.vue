@@ -29,7 +29,7 @@
       ></textarea>
       <MarkerList :items="this.emergencyStore.tempPoints" v-if="tableVisual[item].element == 'Points'" />
     </div>
-    <button @click="emergencyStore.selectedElement != null ? editData() : addData()" :disabled="process">OK</button>
+    <button @click="selectedElement != null ? editData() : addData()" :disabled="process">OK</button>
     <button @click="editmenu.show = false" :disabled="process">Cancel</button>
   </div>
 </template>
@@ -46,6 +46,7 @@ export default {
     tableName: {
       required: true,
     },
+    selectedElement: { default: null },
   },
   data() {
     return {
@@ -80,7 +81,7 @@ export default {
               database.loadFile(this.tableName, this.tempFile, temp['Код'])
             }
             this.emergencyStore.tempPoints.map((i) => (i['Код нс'] = temp['Код']))
-            let difference = this.emergencyStore.selectedElement.Позиції.filter((x) => {
+            let difference = this.selectedElement.Позиції.filter((x) => {
               var re = !this.emergencyStore.tempPoints.some((y) => y.Код == x.Код)
               return re
             })
@@ -133,11 +134,14 @@ export default {
       this.process = false
 
       database.getKeys(this.tableName).then((res) => {
-        var temp = { Код: this.currentId }
+        var temp = { Код: 0 }
+        if (this.selectedElement != null) {
+          temp = this.selectedElement
+        }
         if (this.tableName == 'Надзвичайні ситуації') {
           res.Позиції = 'Points'
-          if (this.emergencyStore.selectedElement != null) {
-            temp = this.emergencyStore.selectedElement
+          if (this.selectedElement != null) {
+            temp = this.selectedElement
           }
         }
         var data = formManager.setupObject(res, temp)

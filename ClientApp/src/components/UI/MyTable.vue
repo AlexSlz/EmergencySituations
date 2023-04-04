@@ -1,4 +1,5 @@
 <template>
+  <button>Update</button>
   <div class="w-full p-3 overflow-auto">
     <table class="w-full text-center">
       <thead>
@@ -9,14 +10,24 @@
       </thead>
       <tbody>
         <tr class="bg-zinc-900 hover:bg-zinc-800" v-for="item in body">
-          <td class="border-x-2" v-for="i in item">{{ i }}</td>
-          <td class="max-w-[2rem]"><button>Edit</button></td>
+          <td class="border-x-2 p-2" v-for="i in item">{{ i }}</td>
+          <td class="flex">
+            <button
+              @click="
+                editmenu.open({ name: 'Edit', table: tableName, element: item, fullPage: tableName != 'Надзвичайні ситуації' })
+              "
+            >
+              Edit
+            </button>
+            <button @click="deleteElement(item)">Delete</button>
+          </td>
         </tr>
       </tbody>
     </table>
   </div>
 </template>
 <script>
+import { useMenuStore } from '@/stores/editMenu'
 import database from '@/main/database'
 export default {
   props: {
@@ -26,22 +37,34 @@ export default {
   },
   data() {
     return {
+      editmenu: useMenuStore(),
       headers: [],
       body: [],
     }
+  },
+  methods: {
+    deleteElement(item) {
+      database.deleteData(this.tableName, item).then((i) => {
+        let index = this.body.indexOf(item)
+        if (index > -1) this.body.splice(index, 1)
+      })
+    },
+    loadData() {
+      database.getKeys(this.tableName).then((i) => {
+        console.log(i)
+        this.headers = i
+      })
+      database.getDataFromTable(this.tableName).then((i) => {
+        this.body = i
+      })
+    },
   },
   watch: {
     tableName: {
       immediate: true,
       handler(val) {
         if (val != undefined) {
-          database.getKeys(this.tableName).then((i) => {
-            console.log(i)
-            this.headers = i
-          })
-          database.getDataFromTable(this.tableName).then((i) => {
-            this.body = i
-          })
+          this.loadData()
         }
       },
     },
