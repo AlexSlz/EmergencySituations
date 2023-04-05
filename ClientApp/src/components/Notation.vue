@@ -1,6 +1,6 @@
 <template>
+  <p class="p-2">Відображати події на карті за</p>
   <select v-model="emergencyStore.colorBy" name="select">
-    <!--Supplement an id here instead of using 'name'-->
     <option class="text-neutral-800" :value="item" v-for="item in Object.keys(color)">{{ item }}</option>
   </select>
 

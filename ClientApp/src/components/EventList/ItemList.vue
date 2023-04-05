@@ -1,10 +1,10 @@
 <template>
-  <div class="item">
+  <div iv class="item">
     <p class="text-2xl py-3">
       {{ data.Назва }}
-      <span class="text-sm tracking-normal whitespace-nowrap text-emerald-500">{{ getTime(data['Дата та час']) }}</span>
+      <span class="text-sm tracking-normal whitespace-nowrap text-myMain">{{ getTime(data['Дата та час']) }}</span>
     </p>
-    <p class="line-clamp-3 text-neutral-400">{{ data.Опис }}</p>
+    <p class="line-clamp-3 text-mySecondText">{{ data.Опис }}</p>
     <img v-show="imgLoad" :src="getImage(data.Зображення)" @load="imgLoad = true" />
   </div>
 </template>
@@ -36,7 +36,7 @@ export default {
 </script>
 <style>
 .item {
-  @apply px-7 py-3 border-b-2 border-neutral-500 hover:border-neutral-400 hover:cursor-pointer;
+  @apply px-7 py-3 border-b-2 border-mySecond hover:border-myMain hover:cursor-pointer;
 }
 img {
   @apply max-w-xs p-1 m-auto;

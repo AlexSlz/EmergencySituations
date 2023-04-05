@@ -1,5 +1,4 @@
 <template>
-  <button class="mb-5" @click="editmenu.open()">Add New Emergency</button>
   <div class="p-2">
     <my-combo class="w-56 m-3" v-model="tableId" :items="tableNameList" />
     <MyTable :tableName="tableNameList[tableId - 1]" />

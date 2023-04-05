@@ -1,13 +1,13 @@
 <template>
-  <div class="p-5">
+  <div class="px-5 overflow-auto max-h-72">
     <div v-for="(item, i) in items">
       <input v-model="item.Назва" />
       <p>{{ item.Розташування }}</p>
       <p>{{ item.X.toFixed(3) }} | {{ item.Y.toFixed(3) }}</p>
       <button @click="RemoveItem(i)">Remove</button>
     </div>
-    <button @click="AddItem">Add</button>
   </div>
+  <button @click="AddItem">Add</button>
 </template>
 <script>
 export default {

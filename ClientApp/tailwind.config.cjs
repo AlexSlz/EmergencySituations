@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+
 module.exports = {
   content: [
     "./index.html",
@@ -7,11 +8,16 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'purple': '#cdb4db',
-        'pink': '#ffc8dd',
-        'moPink': '#ffafcc',
-        'blue': '#bde0fe',
-        'moBlue': '#a2d2ff',
+        'myMain': '#f5f3ff',
+        'myActive': '#0ea5e9',
+        'myRed': '#f43f5e',
+
+        'myText': '#fafafa',
+        'mySecondText': '#a3a3a3',
+
+        'myBG': '#262626',
+        'mySecond': '#404040',
+        'mySecondActive': '#525252'
       }
     },
   },

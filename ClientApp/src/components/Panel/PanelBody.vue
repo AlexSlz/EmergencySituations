@@ -2,7 +2,7 @@
   <div :class="{ fold: fold }" class="panel">
     <ul class="tabs">
       <li v-for="tab in tabs" :class="{ active: tab.isActive, mobile: tab.onlyMobile, fullPage: tab.isActive && tab.fullPage }">
-        <a @click="selectTab(tab)">{{ tab.name }}</a>
+        <a class="select-none" @click="selectTab(tab)">{{ tab.name }}</a>
       </li>
     </ul>
     <div class="">
@@ -33,19 +33,19 @@ export default {
 </script>
 <style scoped>
 .panel {
-  @apply absolute z-20 right-0 top-0 h-full overflow-y-auto bg-neutral-800 min-w-[100%] sm:min-w-[30vw] sm:max-w-sm;
+  @apply absolute z-20 right-0 top-0 h-full overflow-y-auto bg-myBG min-w-[100%] sm:min-w-[30vw] sm:max-w-sm;
 }
 .fold {
   @apply h-auto;
 }
 .tabs {
-  @apply relative overflow-hidden bg-neutral-600 flex justify-center m-2;
+  @apply relative overflow-hidden bg-mySecond flex justify-center m-2;
 }
 .tabs li {
   @apply text-center p-2 text-base; /*float-left list-item*/
 }
 .active {
-  @apply border-emerald-600 border-b-2;
+  @apply border-myMain border-b-2;
 }
 .mobile {
   @apply block sm:hidden;

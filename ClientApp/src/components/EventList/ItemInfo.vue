@@ -1,7 +1,7 @@
 <template>
   <div>
     <slot></slot>
-    <h1 class="break-all mt-5">{{ this.emergencyStore.selectedElement.Назва }}</h1>
+    <h1 class="break-all">{{ this.emergencyStore.selectedElement.Назва }}</h1>
 
     <p>{{ getPosition() }}</p>
 
@@ -9,7 +9,7 @@
       <button v-if="authStore.isAuth" @click="editmenu.open({ name: 'Edit', element: emergencyStore.selectedElement })">
         Edit
       </button>
-      <button @click="deleteData">Delete</button>
+      <button class="hover:bg-myRed" @click="deleteData">Delete</button>
     </template>
   </div>
 </template>
@@ -17,7 +17,6 @@
 import { useAuthStore } from '@/stores/auth'
 import { useMenuStore } from '@/stores/editMenu'
 import { useEmergencyStore } from '@/stores/emergency'
-import database from '@/main/database'
 export default {
   data() {
     return {

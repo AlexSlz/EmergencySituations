@@ -35,7 +35,7 @@ import database from '@/main/database'
       <Tab :fullPage="true" name="Admin">
         <Admin />
       </Tab>
-      <Tab name="Logout"><button @click="authStore.logout()">Confirm</button></Tab>
+      <Tab name="Logout"><input @click="authStore.logout()" type="submit" /></Tab>
     </template>
   </MyPanel>
 </template>

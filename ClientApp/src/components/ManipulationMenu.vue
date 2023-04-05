@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-for="item in Object.keys(tableVisual)">
+    <div class="p-2" v-for="item in Object.keys(tableVisual)">
       <h1>{{ item }}</h1>
 
       <input
