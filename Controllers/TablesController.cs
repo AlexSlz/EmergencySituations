@@ -14,7 +14,7 @@ namespace EmergencySituations.Controllers
     {
         [AuthFilter(new string[] {"Користувачі"})]
         [HttpGet("{tableName}")]
-        public ActionResult<string> GetTable(string tableName, int id = 0, int limit = 999999)
+        public ActionResult<string> GetTable(string tableName, int id = 0, int limit = 999)
         {
             var a = new MyDBContext(tableName);
             var find = a.FirstOrDefault(i => i["Код"].ToString() == id.ToString());

@@ -2,11 +2,13 @@
 {
     public class TokenData
     {
-        public string Key;
+        public string Owner;
+        public Guid Key;
         public DateTime TimeEnd;
-        public TokenData(string key, DateTime timeEnd)
+        public TokenData(string owner, DateTime timeEnd)
         {
-            Key = key;
+            Owner = owner;
+            Key = Guid.NewGuid();
             TimeEnd = timeEnd;
         }
     }

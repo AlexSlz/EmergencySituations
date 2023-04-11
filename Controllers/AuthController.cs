@@ -20,9 +20,9 @@ namespace EmergencySituations.Controllers
             return Token.GenerateToken(user["Логін"].ToString());
         }
         [HttpGet("{token}")]
-        public ActionResult<string> getUserByToken(string token)
+        public ActionResult<string> getTokenOwner(string token)
         {
-            var user = new MyDBContext("Користувачі").FirstOrDefault(u => u["Логін"].ToString() == Token.Decrypt(token));
+            var user = new MyDBContext("Користувачі").FirstOrDefault(u => u["Логін"].ToString() == Token.GetOwner(token));
             if (user == null)
                 return BadRequest("User Not Found");
             user.Remove("Пароль");

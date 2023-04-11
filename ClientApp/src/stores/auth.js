@@ -24,7 +24,5 @@ export const useAuthStore = defineStore('auth', () => {
         isAuth.value = false
     }
 
-
-
     return { userData, isAuth, logout, auth }
 })
