@@ -1,5 +1,7 @@
 ﻿using System.Data;
 using System.Data.OleDb;
+using System.IO;
+using System.Net;
 
 #pragma warning disable CA1416 // Проверка совместимости платформы
 
@@ -159,14 +161,23 @@ namespace EmergencySituations.DataBase
                 Console.WriteLine("\n[!] DB NOT Connected\n");
                 Console.WriteLine(ex.Message);
                 Console.WriteLine("\n[?]ReConnect?\n");
-                if (string.IsNullOrEmpty(Console.ReadLine()))
+                string temp = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "EmergencySituations.accdb");
+
+
+                using (WebClient client = new WebClient())
                 {
-                    TryConnectToDB(conn);
+                    client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
+                    client.DownloadFile("https://github.com/AlexSlz/EmergencySituations/raw/master/EmergencySituations.accdb", temp);
                 }
-                else
-                {
-                    Environment.Exit(0);
-                }
+
+                /*                if (string.IsNullOrEmpty(Console.ReadLine()))
+                                {
+                                    TryConnectToDB(conn);
+                                }
+                                else
+                                {
+                                    Environment.Exit(0);
+                                }*/
             }
         }
         private static void Disconnect(OleDbConnection conn)
