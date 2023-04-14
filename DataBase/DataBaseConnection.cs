@@ -12,13 +12,14 @@ namespace EmergencySituations.DataBase
             _connection.Open();
         }
         List<SQLiteCommand> _commands = new List<SQLiteCommand>();
-        public SQLiteCommand CreateCommand(string q, params object[] args)
+        public SQLiteCommand CreateCommand(string q, Dictionary<string, string> args = null)
         {
             SQLiteCommand cmd = new SQLiteCommand(q, _connection);
-            foreach(var a in args)
-            {
-                cmd.Parameters.Add(a);
-            }
+            if(args != null)
+                foreach (var a in args)
+                {
+                    cmd.Parameters.AddWithValue("@" + a.Key, a.Value);
+                }
             _commands.Add(cmd);
             return cmd;
         }

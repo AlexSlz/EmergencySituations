@@ -12,23 +12,42 @@ namespace EmergencySituations.DataBase
         public static string SqlConfig => sqlConfig;
         public static void Setup(string databasePath)
         {
-            sqlConfig = databasePath;
+            sqlConfig = databasePath + ";foreign keys=true";
             ExecuteNonQuery(Users.Sql);
+
+            ExecuteNonQuery(EmergencyLevel.Sql);
+            if (MyDataBase.Count<EmergencyLevel>() <= 0)
+            {
+                MyDataBase.Insert(new EmergencyLevel() { Name = "Державний" });
+                MyDataBase.Insert(new EmergencyLevel() { Name = "Регіональний" });
+                MyDataBase.Insert(new EmergencyLevel() { Name = "Місцевий" });
+                MyDataBase.Insert(new EmergencyLevel() { Name = "Об'єктовий" });
+            }
+            ExecuteNonQuery(EmergencyType.Sql);
+            if (MyDataBase.Count<EmergencyType>() <= 0)
+            {
+                MyDataBase.Insert(new EmergencyType() { Name = "Природного" });
+                MyDataBase.Insert(new EmergencyType() { Name = "Техногенного" });
+                MyDataBase.Insert(new EmergencyType() { Name = "Екологічного" });
+                MyDataBase.Insert(new EmergencyType() { Name = "Соціального" });
+            }
+            ExecuteNonQuery(Positions.Sql);
+            ExecuteNonQuery(Emergency.Sql);
         }
 
-        private static string ExecuteNonQuery(string q)
+        private static string ExecuteNonQuery(string q, Dictionary<string, string> args = null)
         {
             try
             {
                 using (DataBaseConnection sql = new DataBaseConnection())
                 {
-                    var a = sql.CreateCommand(q).ExecuteNonQuery();
+                    var a = sql.CreateCommand(q, args).ExecuteNonQuery();
                     return $"Ok, {a}";
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(q);
+                Console.WriteLine($"{q} \n {ex.Message}");
                 return ex.Message;
             }
         }
@@ -37,18 +56,17 @@ namespace EmergencySituations.DataBase
         {
             var data = MyDBExtension.GetClassData(obj);
             if (data.data.Count <= 0) return "Zero";
-            string q = $@"INSERT INTO [{data.tableName}] ([{String.Join("], [", data.data.Keys.ToArray())}]) VALUES ({String.Join(", ", data.data.Values.ToArray())})";
-
-            return ExecuteNonQuery(q);
+            string q = $"INSERT INTO [{data.tableName}] ([{String.Join("], [", data.data.Keys.ToArray())}]) VALUES ({String.Join(", ", data.data.Values.Select(i => "?").ToArray())})";
+            return ExecuteNonQuery(q, data.data);
         }
 
         public static string Update(IDBTable obj)
         {
             var data = MyDBExtension.GetClassData(obj);
-            var temp = data.data.Select(x => $"{x.Key} = {x.Value}").ToArray();
+            var temp = data.data.Select(x => $"[{x.Key}] = @{x.Key}").ToArray();
             string q = $@"UPDATE [{data.tableName}] SET {String.Join(", ", temp)} WHERE Id = {obj.Id}";
-
-            return ExecuteNonQuery(q);
+            Console.WriteLine(q);
+            return ExecuteNonQuery(q, data.data);
         }
 
         public static string Delete(IDBTable obj)
@@ -75,9 +93,18 @@ namespace EmergencySituations.DataBase
                     table.Load(reader);
                 }
             }
-            var a = table.TableToClassList<T>();
             return table.TableToClassList<T>();
         }
+
+        public static int Count<T>() where T : IDBTable
+        {
+            string q = $"SELECT COUNT(*) FROM {typeof(T).Name}";
+            using (var sql = new DataBaseConnection())
+            {
+                return Convert.ToInt32(sql.CreateCommand(q).ExecuteScalar());
+            }
+        } 
+
     }
 
     public static class MyDBExtension
@@ -88,14 +115,9 @@ namespace EmergencySituations.DataBase
 
             var data = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(i => $"{i.GetValue(table, null)}" != "" && i.Name != "Id")
-                .ToDictionary(i => i.Name, i => i.GetMyValue(table));
+                .ToDictionary(i => i.Name, i => $"{i.GetValue(table, null)}");
 
             return (tableName: type.Name, data: data);
-        }
-        private static string GetMyValue(this PropertyInfo property, object obj)
-        {
-            string value = $"{property.GetValue(obj, null)}";
-            return (property.PropertyType == typeof(string)) ? $"'{value}'" : value;
         }
         public static List<T> TableToClassList<T>(this DataTable dt)
         {
