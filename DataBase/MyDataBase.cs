@@ -1,191 +1,123 @@
-﻿using System.Data;
-using System.Data.OleDb;
-using System.IO;
-using System.Net;
-
-#pragma warning disable CA1416 // Проверка совместимости платформы
+﻿using EmergencySituations.DataBase.Model;
+using System.Data;
+using System.Data.SQLite;
+using System.Reflection;
+using System.Xml;
 
 namespace EmergencySituations.DataBase
 {
     public static class MyDataBase
     {
-        private static OleDbConnection _conn = null;
-
-        public static void Connect(string fileName)
+        private static string sqlConfig;
+        public static string SqlConfig => sqlConfig;
+        public static void Setup(string databasePath)
         {
-            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
-            string connString = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={filePath};Persist Security Info=False;";
-            _conn = new OleDbConnection(connString);
-            TryConnectToDB(_conn);
+            sqlConfig = databasePath;
+            ExecuteNonQuery(Users.Sql);
         }
 
-        public static List<Dictionary<string, dynamic>> GetData(string q)
+        private static string ExecuteNonQuery(string q)
         {
-            if (string.IsNullOrEmpty(q))
-                return null;
             try
             {
-                using (DataTable table = new DataTable())
-                using (OleDbCommand cmd = new OleDbCommand(q, _conn))
-                using (OleDbDataReader reader = cmd.ExecuteReader())
+                using (DataBaseConnection sql = new DataBaseConnection())
+                {
+                    var a = sql.CreateCommand(q).ExecuteNonQuery();
+                    return $"Ok, {a}";
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(q);
+                return ex.Message;
+            }
+        }
+
+        public static string Insert(IDBTable obj)
+        {
+            var data = MyDBExtension.GetClassData(obj);
+            if (data.data.Count <= 0) return "Zero";
+            string q = $@"INSERT INTO [{data.tableName}] ([{String.Join("], [", data.data.Keys.ToArray())}]) VALUES ({String.Join(", ", data.data.Values.ToArray())})";
+
+            return ExecuteNonQuery(q);
+        }
+
+        public static string Update(IDBTable obj)
+        {
+            var data = MyDBExtension.GetClassData(obj);
+            var temp = data.data.Select(x => $"{x.Key} = {x.Value}").ToArray();
+            string q = $@"UPDATE [{data.tableName}] SET {String.Join(", ", temp)} WHERE Id = {obj.Id}";
+
+            return ExecuteNonQuery(q);
+        }
+
+        public static string Delete(IDBTable obj)
+        {
+            string q = $"DELETE FROM [{obj.GetType().Name}] WHERE [Id] = {obj.Id}";
+            return ExecuteNonQuery(q);
+        }
+
+        public static string Delete<T>(int id) where T : IDBTable
+        {
+            string q = $"DELETE FROM [{typeof(T).Name}] WHERE [Id] = {id}";
+            return ExecuteNonQuery(q);
+        }
+
+        public static List<T> Select<T>(string q = "") where T : IDBTable
+        {
+            if(string.IsNullOrEmpty(q))
+            q = $"SELECT * FROM {typeof(T).Name}";
+            DataTable table = new DataTable();
+            using (var sql = new DataBaseConnection())
+            {
+                using (var reader = sql.CreateCommand(q).ExecuteReader())
                 {
                     table.Load(reader);
-                    return table.AsEnumerable().Select(
-                        row => table.Columns.Cast<DataColumn>().ToDictionary(
-                            column => column.ColumnName,
-                            column => (string.IsNullOrEmpty(row[column].ToString())) ? "" : row[column])).ToList();
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[!] {q}\n{ex.Message}");
-                return null;
-            }
+            var a = table.TableToClassList<T>();
+            return table.TableToClassList<T>();
         }
+    }
 
-        public static bool AddRow(string tableName, Dictionary<string, object> data)
+    public static class MyDBExtension
+    {
+        public static (string tableName, Dictionary<string, string> data) GetClassData(IDBTable table)
         {
-            var temp = GetValue(data, tableName);
-            string q = $"INSERT INTO [{tableName}] ([{String.Join("], [", data.Keys.ToArray())}]) VALUES ({String.Join(", ", temp.ToArray())})";
-            return ExecuteQuery(q);
+            var type = table.GetType();
+
+            var data = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(i => $"{i.GetValue(table, null)}" != "" && i.Name != "Id")
+                .ToDictionary(i => i.Name, i => i.GetMyValue(table));
+
+            return (tableName: type.Name, data: data);
         }
-
-        public static bool UpdateRow(string tableName, Dictionary<string, object> data)
+        private static string GetMyValue(this PropertyInfo property, object obj)
         {
-            if(!data.TryGetValue("Код", out var Key))
-            {
-                return AddRow(tableName, data);
-            }
-            data.Remove("Код");
-            var temp = GetValue(data, tableName, true);
-            string q = $"UPDATE [{tableName}] SET {String.Join(", ", temp.ToArray())} WHERE [Код] = {Key}";
-            return ExecuteQuery(q);
+            string value = $"{property.GetValue(obj, null)}";
+            return (property.PropertyType == typeof(string)) ? $"'{value}'" : value;
         }
-
-        private static List<string> GetValue(Dictionary<string, object> data, string tableName, bool update = false)
+        public static List<T> TableToClassList<T>(this DataTable dt)
         {
-            var temp = new List<string>();
-            var columnName = GetKeyTypeTable(tableName);
-            foreach (var row in data)
-            {
-                string value = $"'{row.Value}'";
-                if (columnName[row.Key] == "Int32")
+            var columnNames = dt.Columns.Cast<DataColumn>().Select(c => c.ColumnName.ToLower()).ToList();
+            var properties = typeof(T).GetProperties();
+
+            
+            return dt.AsEnumerable().Select(row => {
+                var objT = Activator.CreateInstance<T>();
+                foreach (var pro in properties)
                 {
-                    value = (row.Value.ToString());
+                    if (columnNames.Contains(pro.Name.ToLower()))
+                    {
+                        object value = row[pro.Name];
+                        object safeValue = value == null || DBNull.Value.Equals(value)
+                            ? null
+                            : Convert.ChangeType(value, pro.PropertyType);
+                        pro.SetValue(objT, safeValue);
+                    }
                 }
-                if (row.Key.Contains("Дата"))
-                {
-                    value = value.Replace('T', ' ');
-                }
-                temp.Add($"{(update ? $"[{row.Key}] =" : "")}{value}");
-            }
-            return temp;
-        }
-
-        private static bool ExecuteQuery(string q)
-        {
-            try
-            {
-                using (OleDbCommand cmd = new OleDbCommand(q, _conn))
-                {
-                    cmd.ExecuteNonQuery();
-                }
-                //Console.WriteLine($"[+] {q}");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[!] {q}\n{ex.Message}");
-                return false;
-            }
-        }
-
-        public static string ExecuteQueryWithValue(string q)
-        {
-            using (OleDbCommand cmd = new OleDbCommand(q, _conn))
-            {
-                return cmd.ExecuteScalar().ToString();
-            }
-        }
-
-        public static bool DeleteRowById(string tableName, int id)
-        {
-            string q = $"DELETE FROM [{tableName}] WHERE [Код] = {id}";
-            return ExecuteQuery(q);
-        }
-
-        public static Dictionary<string, string> GetKeyTypeTable(string tableName)
-        {
-            Dictionary<string, string> result = new Dictionary<string, string>();
-
-
-            string q = $"SELECT * FROM [{tableName}]";
-
-
-            using(OleDbCommand cmd = new OleDbCommand(q, _conn))
-            using(OleDbDataReader rdr = cmd.ExecuteReader())
-            {
-                rdr.Read();
-                for (int i = 0; i < rdr.VisibleFieldCount; i++)
-                {
-                    System.Type type = rdr.GetFieldType(i);
-
-                    result.Add(rdr.GetName(i), type.Name);
-                }
-            }
-
-            return result;
-        }
-
-        public static List<string> GetTableNameList()
-        {
-            List<string> list = new List<string>();
-            DataTable dt = _conn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, new object[] { null, null, null, "TABLE" });
-            foreach (DataRow dr in dt.Rows)
-            {
-                if (!dr["TABLE_NAME"].ToString().Contains("~"))
-                    list.Add(dr["TABLE_NAME"].ToString());
-            }
-            return list;
-        }
-
-        private static void TryConnectToDB(OleDbConnection conn)
-        {
-            try
-            {
-                conn.Open();
-                Console.WriteLine("\n[+] DB Connected\n");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("\n[!] DB NOT Connected\n");
-                Console.WriteLine(ex.Message);
-                Console.WriteLine("\n[?]ReConnect?\n");
-                string temp = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "EmergencySituations.accdb");
-
-
-                using (WebClient client = new WebClient())
-                {
-                    client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
-                    client.DownloadFile("https://github.com/AlexSlz/EmergencySituations/raw/master/EmergencySituations.accdb", temp);
-                }
-
-                /*                if (string.IsNullOrEmpty(Console.ReadLine()))
-                                {
-                                    TryConnectToDB(conn);
-                                }
-                                else
-                                {
-                                    Environment.Exit(0);
-                                }*/
-            }
-        }
-        private static void Disconnect(OleDbConnection conn)
-        {
-            conn.Close();
-            GC.SuppressFinalize(conn);
-            GC.Collect();
+                return objT;
+            }).ToList();
         }
     }
 }
-#pragma warning restore CA1416 // Проверка совместимости платформы

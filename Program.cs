@@ -1,10 +1,12 @@
 using EmergencySituations.DataBase;
+using EmergencySituations.DataBase.Model;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-MyDataBase.Connect(builder.Configuration.GetConnectionString("DataBaseFile"));
+
+MyDataBase.Setup(builder.Configuration.GetConnectionString("DataBaseFile"));
 
 var app = builder.Build();
 
@@ -12,9 +14,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.MapControllers();
 
-app.MapFallbackToFile("index.html");
+app.MapFallbackToFile("index.html"); ;
 
-    app.Run();
+app.Run();
+
