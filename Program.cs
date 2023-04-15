@@ -1,10 +1,12 @@
 using EmergencySituations.DataBase;
-using EmergencySituations.DataBase.Model;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    //options.JsonSerializerOptions.Converters.Add(new JsonDate());
+});
 
 MyDataBase.Setup(builder.Configuration.GetConnectionString("DataBaseFile"));
 

@@ -11,8 +11,7 @@ namespace EmergencySituations.Controllers
         [HttpGet]
         public ActionResult<string> GetTableNameList()
         {
-            return Ok();
-            //return Ok(MyDataBase.GetTableNameList());
+            return Ok(MyDataBase.GetTableNameList());
         }
 
         [HttpGet("getKey/{tableName}")]

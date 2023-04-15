@@ -1,4 +1,5 @@
-﻿using EmergencySituations.DataBase;
+﻿using EmergencySituations.Auth;
+using EmergencySituations.DataBase;
 using EmergencySituations.DataBase.Model;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +12,14 @@ namespace EmergencySituations.Controllers
         {
             return Ok(MyDataBase.Select<T>());
         }
+
+        [HttpGet("getKeys")]
+        public ActionResult<string> GetKeys()
+        {
+            return Ok(MyDataBase.GetTableKeys<T>());
+        }
         [HttpPost]
+        [AuthFilter]
         public ActionResult<string> AddToTable(T data)
         {
             return Ok(MyDataBase.Insert(data));
@@ -23,18 +31,21 @@ namespace EmergencySituations.Controllers
         }
 
         [HttpPut]
+        [AuthFilter]
         public ActionResult<string> EditTable(T data)
         {
             return Ok(MyDataBase.Update(data));
         }
 
         [HttpDelete]
+        [AuthFilter]
         public ActionResult<string> DeleteDataFromTable(T data)
         {
             return Ok(MyDataBase.Delete(data));
         }
 
         [HttpDelete("{id}")]
+        [AuthFilter]
         public ActionResult<string> DeleteDataFromTableByKey(int id)
         {
             return Ok(MyDataBase.Delete<Users>(id));
