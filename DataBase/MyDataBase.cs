@@ -80,14 +80,16 @@ namespace EmergencySituations.DataBase
 
         public static string Delete(IDBTable obj)
         {
+
             string q = $"DELETE FROM [{obj.GetType().Name}] WHERE [Id] = {obj.Id}";
             return ExecuteNonQuery(q);
         }
 
         public static string Delete<T>(int id) where T : IDBTable
         {
-            string q = $"DELETE FROM [{typeof(T).Name}] WHERE [Id] = {id}";
-            return ExecuteNonQuery(q);
+            var obj = Activator.CreateInstance<T>();
+            obj.Id = id;
+            return Delete(obj);
         }
 
         public static List<T> Select<T>(string q = "") where T : IDBTable

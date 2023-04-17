@@ -1,5 +1,5 @@
 <template>
-  <p class="p-2 text-rose-600">{{ ErrorMsg }}</p>
+  <p class="p-2 text-myRed">{{ ErrorMsg }}</p>
   <form @submit.prevent="auth()">
     <input type="text" placeholder="Login" v-model="login" />
     <input type="password" placeholder="Password" v-model="pass" />
@@ -13,7 +13,7 @@ import { useAuthStore } from '@/stores/auth'
 export default {
   data() {
     return {
-      login: 'admin',
+      login: 'Admin',
       pass: '123',
       ErrorMsg: '',
       authStore: useAuthStore(),
@@ -22,10 +22,9 @@ export default {
   methods: {
     auth() {
       database
-        .getToken(this.login, this.pass)
+        .GetToken(this.login, this.pass)
         .then((t) => {
-          this.ErrorMsg = 'ok'
-          database.getUser(t).then((res) => {
+          database.GetUserByToken(t).then((res) => {
             this.authStore.auth(res, t)
           })
         })
@@ -37,4 +36,3 @@ export default {
   },
 }
 </script>
-<style lang=""></style>

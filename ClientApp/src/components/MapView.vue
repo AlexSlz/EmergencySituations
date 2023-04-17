@@ -20,7 +20,7 @@ export default {
       map: null,
       markerList: [],
       tempList: [],
-      emergencyStore: useEmergencyStore(),
+      emergency: useEmergencyStore(),
     }
   },
   mounted() {
@@ -50,14 +50,14 @@ export default {
       this.markerList.forEach((m) => {
         L.DomUtil.removeClass(m._icon, 'gps_ring')
       })
-      if (element == null || element.Позиції === undefined || element.Позиції.length == 0) return
+      if (element == null || element.positions === undefined || element.positions.length == 0) return
 
       var Points = []
       this.markerList.forEach((m) => {
-        element.Позиції.forEach((i) => {
-          if (m._latlng.lat == i.X && m._latlng.lng == i.Y) {
+        element.positions.forEach((i) => {
+          if (m._latlng.lat == i.x && m._latlng.lng == i.y) {
             L.DomUtil.addClass(m._icon, 'gps_ring')
-            Points.push([i.X, i.Y])
+            Points.push([i.x, i.y])
           }
         })
       })
@@ -76,25 +76,20 @@ export default {
     displayMarkers(elements) {
       this.deleteMarkers(this.markerList)
       elements.forEach((element) => {
-        element.Позиції.forEach((i) => {
-          // var marker = L.circleMarker([i.X, i.Y], {
-          //   color: color[this.emergencyStore.colorBy][element[this.emergencyStore.colorBy]],
-          //   radius: 13,
-          //   fillOpacity: 0.9,
-          // })
+        element.positions.forEach((i) => {
           var icon = L.divIcon({
             html: `<span style="background-color: ${
-              color[this.emergencyStore.colorBy][element[this.emergencyStore.colorBy]]
+              color[this.emergency.colorBy][element[this.emergency.colorBy]]
             }" class="circle"></span>`,
             className: '',
             iconSize: [30, 30],
           })
-          var marker = L.marker([i.X, i.Y], {
+          var marker = L.marker([i.x, i.y], {
             icon: icon,
           })
             .addTo(this.map)
             .on('click', (e) => {
-              this.emergencyStore.selectElement(element)
+              this.emergency.select(element)
             })
           this.markerList.push(marker)
         })
@@ -132,32 +127,32 @@ export default {
     },
   },
   watch: {
-    'emergencyStore.emergencyList': {
+    'emergency.list': {
       immediate: true,
       deep: true,
-      handler(val, oldVal) {
+      handler(val) {
         setTimeout(() => {
           this.displayMarkers(val)
         })
       },
     },
-    'emergencyStore.selectedElement': {
+    'emergency.selected': {
       deep: true,
-      handler(val, oldVal) {
+      handler(val) {
         if (val == null) this.zoomOut()
         this.LookAtElement(val)
       },
     },
-    'emergencyStore.colorBy': {
+    'emergency.colorBy': {
       deep: true,
-      handler(val, oldVal) {
-        this.displayMarkers(this.emergencyStore.emergencyList)
+      handler() {
+        this.displayMarkers(this.emergency.list)
       },
     },
-    'emergencyStore.tempPoints.length': {
+    'emergency.tempPoints.length': {
       deep: true,
-      handler(val, oldVal) {
-        if (this.emergencyStore.tempPoints != undefined) this.displayNewMarkers(this.emergencyStore.tempPoints)
+      handler() {
+        if (this.emergency.tempPoints != undefined) this.displayNewMarkers(this.emergency.tempPoints)
       },
     },
   },

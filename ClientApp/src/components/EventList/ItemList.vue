@@ -1,11 +1,10 @@
 <template>
   <div iv class="item">
     <p class="text-2xl py-3">
-      {{ data.Назва }}
-      <span class="text-sm tracking-normal whitespace-nowrap text-myMain">{{ getTime(data['Дата та час']) }}</span>
+      {{ data.name }}
+      <span class="text-sm tracking-normal whitespace-nowrap text-myMain">{{ getTime(data.dateAndTime) }}</span>
     </p>
-    <p class="line-clamp-3 text-mySecondText">{{ data.Опис }}</p>
-    <img v-show="imgLoad" :src="getImage(data.Зображення)" @load="imgLoad = true" />
+    <p class="line-clamp-3 text-mySecondText">{{ data.description }}</p>
   </div>
 </template>
 <script>
@@ -22,9 +21,6 @@ export default {
     }
   },
   methods: {
-    getImage(id) {
-      if (id != '') return `${window.location.origin}/api/file/Надзвичайні ситуації/${id}`
-    },
     getTime(time) {
       var result = time.replace('T', ' ')
       var temp = result.split(' ', 2)

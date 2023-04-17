@@ -1,6 +1,6 @@
 <template>
   <p class="p-2">Відображати події на карті за</p>
-  <select v-model="emergencyStore.colorBy" name="select">
+  <select v-model="emergency.colorBy" name="select">
     <option class="text-neutral-800" :value="item" v-for="item in Object.keys(color)">{{ item }}</option>
   </select>
 
@@ -20,7 +20,7 @@ export default {
   data() {
     return {
       color: color,
-      emergencyStore: useEmergencyStore(),
+      emergency: useEmergencyStore(),
     }
   },
 }

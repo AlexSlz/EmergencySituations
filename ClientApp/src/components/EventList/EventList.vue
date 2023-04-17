@@ -1,25 +1,46 @@
 <script setup>
 import ItemInfo from './ItemInfo.vue'
 import ItemList from './ItemList.vue'
+import { useEmergencyStore } from '@/stores/emergency'
+import database from '@/main/database'
 </script>
 
 <template>
   <div class="block">
-    <div v-if="emergencyStore.selectedElement != null">
-      <input @click="emergencyStore.selectElement(null)" value="Назад" type="button" />
-      <ItemInfo :selectedElement="emergencyStore.selectedElement" />
+    <div v-if="emergency.selected != null">
+      <input @click="emergency.select(null)" value="Назад" type="button" />
+      <ItemInfo :element="emergency.selected" />
     </div>
     <template v-else>
-      <button v-if="authStore.isAuth" @click="editmenu.open()">Add New</button>
-      <ItemList @click="emergencyStore.selectElement(item)" :data="item" v-for="(item, i) in getItems()" />
-      <!-- <p class="fixed bottom-1 right-9">{{ itemsCount }} / {{ emergencyStore.emergencyList.length }}</p>
-      <h1 v-if="emergencyStore.emergencyList.length == 0" class="text-center pt-3">Список порожній.</h1> -->
+      <ItemList @click="emergency.select(item)" :data="item" v-for="(item, i) in emergency.list" />
+      <h1 v-if="emergency.list.length == 0" class="text-center pt-3">{{ message }}</h1>
     </template>
-    <div ref="obs"></div>
   </div>
 </template>
 
 <script>
+export default {
+  data() {
+    return {
+      emergency: useEmergencyStore(),
+      message: 'Loading...',
+    }
+  },
+  beforeMount() {
+    database
+      .GetData('Emergency')
+      .then((res) => {
+        this.emergency.list = res
+        this.message = 'Список порожній.'
+      })
+      .catch((e) => {
+        this.message = e
+      })
+  },
+}
+</script>
+
+<!-- <script>
 import { useAuthStore } from '@/stores/auth'
 import { useEmergencyStore } from '@/stores/emergency'
 import { useMenuStore } from '@/stores/editMenu'
@@ -55,4 +76,4 @@ export default {
     },
   },
 }
-</script>
+</script> -->

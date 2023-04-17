@@ -8,8 +8,10 @@ namespace EmergencySituations.Controllers
     public abstract class MyControllerBase<T> : ControllerBase where T : IDBTable, new()
     {
         [HttpGet]
-        public ActionResult<string> GetTableData()
+        public ActionResult<string> GetTableData(int id = 0)
         {
+            if(id >= 1)
+                return Ok(MyDataBase.Select<T>().Where(x => x.Id == id));
             return Ok(MyDataBase.Select<T>());
         }
 
@@ -18,6 +20,7 @@ namespace EmergencySituations.Controllers
         {
             return Ok(MyDataBase.GetTableKeys<T>());
         }
+
         [HttpPost]
         [AuthFilter]
         public ActionResult<string> AddToTable(T data)
@@ -48,7 +51,7 @@ namespace EmergencySituations.Controllers
         [AuthFilter]
         public ActionResult<string> DeleteDataFromTableByKey(int id)
         {
-            return Ok(MyDataBase.Delete<Users>(id));
+            return Ok(MyDataBase.Delete<T>(id));
         }
 
     }
