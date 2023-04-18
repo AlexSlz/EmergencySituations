@@ -1,32 +1,32 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export const useMenuStore = defineStore('editMenu', () => {
+export const useActionPanel = defineStore('actionPanel', () => {
     const show = ref(false)
     const name = ref('Add')
+    const tableName = ref('Emergency')
     const fullPage = ref(false)
-    const table = ref('Надзвичайні ситуації')
-    const selectedElement = ref(null)
+    const selected = ref({})
 
     function open(obj) {
         show.value = true
         if (obj == undefined) {
             name.value = 'Add'
+            tableName.value = 'Emergency'
             fullPage.value = false
-            table.value = 'Надзвичайні ситуації'
-            selectedElement.value = null
+            selected.value = {}
             return
         }
         if ('name' in obj)
             name.value = obj['name']
-        if ('table' in obj)
-            table.value = obj['table']
+        if ('tableName' in obj)
+            tableName.value = obj['tableName']
         if ('fullPage' in obj)
             fullPage.value = obj['fullPage']
         if ('element' in obj)
-            selectedElement.value = obj['element']
+            selected.value = obj['element']
     }
 
 
-    return { show, name, fullPage, table, selectedElement, open }
+    return { show, name, tableName, fullPage, selected, open }
 })

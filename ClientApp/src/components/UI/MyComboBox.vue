@@ -1,6 +1,6 @@
 <template>
   <select :value="modelValue" @change="changeCombo">
-    <option class="text-neutral-700" :value="i + 1" v-for="(item, i) in itemsVisual">{{ item }}</option>
+    <option class="text-mySecond" :value="item" v-for="item in itemsVisual">{{ item }}</option>
   </select>
 </template>
 <script>
@@ -28,6 +28,7 @@ export default {
       this.$emit('update:modelValue', e.target.value)
     },
     checkValue() {
+      console.log(this.modelValue)
       if (typeof this.modelValue != 'number') {
         this.$emit('update:modelValue', this.itemsVisual.indexOf(this.modelValue) + 1)
       }
@@ -38,9 +39,9 @@ export default {
       immediate: true,
       handler(val, oldVal) {
         if (val != undefined) {
-          database.getDataFromTable(this.tableName).then((i) => {
-            this.itemsVisual = i.map((a) => a.Назва)
-            this.checkValue()
+          database.GetData(this.tableName).then((i) => {
+            this.itemsVisual = i.map((a) => a.name)
+            if (this.modelValue === undefined) this.$emit('update:modelValue', this.itemsVisual[0])
           })
         }
       },

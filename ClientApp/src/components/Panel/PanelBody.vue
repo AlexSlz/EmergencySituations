@@ -23,6 +23,7 @@ export default {
   },
   methods: {
     selectTab(selectedTab) {
+      if (selectedTab.isActive) selectedTab.tabClick()
       this.fold = 'fold' in selectedTab
       this.tabs.forEach((tab) => {
         tab.isActive = tab.name == selectedTab.name

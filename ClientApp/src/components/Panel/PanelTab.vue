@@ -19,6 +19,11 @@ export default {
     this.$parent.tabs.push(this)
     if (this.openByDefault) this.$parent.selectTab(this)
   },
+  methods: {
+    tabClick() {
+      this.$emit('onTabClick')
+    },
+  },
   mounted() {
     this.$emit('ifMount')
   },
@@ -39,6 +44,6 @@ export default {
       },
     },
   },
-  emits: ['ifActive', 'ifNotActive', 'ifMount', 'ifUnMount'],
+  emits: ['ifActive', 'ifNotActive', 'ifMount', 'ifUnMount', 'onTabClick'],
 }
 </script>

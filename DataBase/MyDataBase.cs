@@ -4,6 +4,7 @@ using System;
 using System.Data;
 using System.Data.SQLite;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Reflection.PortableExecutable;
 using System.Xml;
 
@@ -44,7 +45,7 @@ namespace EmergencySituations.DataBase
             ExecuteNonQuery(Emergency.Sql);
         }
 
-        private static string ExecuteNonQuery(string q, Dictionary<string, string> args = null)
+        private static string ExecuteNonQuery(string q, Dictionary<string, object> args = null)
         {
             try
             {
@@ -61,10 +62,14 @@ namespace EmergencySituations.DataBase
             }
         }
 
-        public static string Insert(IDBTable obj)
+        public static string Insert(IDBTable obj, params string[] deleteKey)
         {
             var data = MyDBExtension.GetClassData(obj);
             if (data.data.Count <= 0) return "Zero";
+            foreach (var key in deleteKey)
+            {
+                data.data.Remove(key);
+            }
             string q = $"INSERT INTO [{data.tableName}] ([{String.Join("], [", data.data.Keys.ToArray())}]) VALUES ({String.Join(", ", data.data.Values.Select(i => "?").ToArray())})";
             return ExecuteNonQuery(q, data.data);
         }
@@ -160,15 +165,36 @@ namespace EmergencySituations.DataBase
             }
         }
 
-        public static (string tableName, Dictionary<string, string> data) GetClassData(IDBTable table)
+        public static (string tableName, Dictionary<string, object> data) GetClassData(IDBTable table)
         {
+            var tables = MyDataBase.GetTableNameList();
             var type = table.GetType();
 
             var data = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(i => $"{i.GetValue(table, null)}" != "" && i.Name != "Id")
-                .ToDictionary(i => i.Name, i => $"{i.GetValue(table, null)}");
+                .ToDictionary(i => i.Name, i => i.GetValue(table, null));
 
-            return (tableName: type.Name, data: data);
+            return (tableName: type.Name, data);
+        }
+
+        public static List<object> CheckRelationTable(this IDBTable data)
+        {
+            var table = MyDataBase.GetTableNameList();
+            var properties = data.GetType().GetProperties();
+            List<object> result = new List<object>();
+            foreach ( var property in properties )
+            {
+                var pName = property.PropertyType.Name;
+                if (pName == typeof(List<>).Name)
+                    foreach (var item in table)
+                    {
+                        if (item == property.Name)
+                        {
+                            result.Add(property.GetValue(data));                   
+                        }
+                    }
+            }
+            return result;
         }
 
         public static List<T> ToClass<T>(this List<Dictionary<string, object>> data) where T : IDBTable

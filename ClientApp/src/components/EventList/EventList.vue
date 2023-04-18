@@ -2,6 +2,7 @@
 import ItemInfo from './ItemInfo.vue'
 import ItemList from './ItemList.vue'
 import { useEmergencyStore } from '@/stores/emergency'
+import { useActionPanel } from '@/stores/actionPanel'
 import database from '@/main/database'
 </script>
 
@@ -12,6 +13,7 @@ import database from '@/main/database'
       <ItemInfo :element="emergency.selected" />
     </div>
     <template v-else>
+      <button v-if="isAuth" @click="actionPanel.open()">Add New</button>
       <ItemList @click="emergency.select(item)" :data="item" v-for="(item, i) in emergency.list" />
       <h1 v-if="emergency.list.length == 0" class="text-center pt-3">{{ message }}</h1>
     </template>
@@ -20,9 +22,16 @@ import database from '@/main/database'
 
 <script>
 export default {
+  props: {
+    isAuth: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       emergency: useEmergencyStore(),
+      actionPanel: useActionPanel(),
       message: 'Loading...',
     }
   },

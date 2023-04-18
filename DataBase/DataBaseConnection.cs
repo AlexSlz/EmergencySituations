@@ -12,7 +12,7 @@ namespace EmergencySituations.DataBase
             _connection.Open();
         }
         List<SQLiteCommand> _commands = new List<SQLiteCommand>();
-        public SQLiteCommand CreateCommand(string q, Dictionary<string, string> args = null)
+        public SQLiteCommand CreateCommand(string q, Dictionary<string, object> args = null)
         {
             SQLiteCommand cmd = new SQLiteCommand(q, _connection);
             if(args != null)

@@ -99,18 +99,18 @@ export default {
       this.deleteMarkers(this.tempList)
       items.forEach((element) => {
         var pos = this.map.getCenter()
-        if (element.X == -1 && element.Y == -1) {
-          element.X = pos.lat
-          element.Y = pos.lng
+        if (element.x == -1 && element.y == -1) {
+          element.x = pos.lat
+          element.y = pos.lng
         }
-        var temp = L.marker([element.X, element.Y], { draggable: true, autoPan: true })
+        var temp = L.marker([element.x, element.y], { draggable: true, autoPan: true })
           .addTo(this.map)
           .on('dragend', function (e) {
             var position = e.target.getLatLng()
-            element.X = position.lat
-            element.Y = position.lng
+            element.x = position.lat
+            element.y = position.lng
             geo(position.lat, position.lng).then((d) => {
-              element.Розташування = d
+              element.location = d
             })
           })
         this.tempList.push(temp)

@@ -23,7 +23,7 @@ namespace EmergencySituations.Controllers
 
         [HttpPost]
         [AuthFilter]
-        public ActionResult<string> AddToTable(T data)
+        public virtual ActionResult<string> AddToTable(T data)
         {
             return Ok(MyDataBase.Insert(data));
         }

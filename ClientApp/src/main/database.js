@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
+
 async function GetData(tableName) {
     var data = await axios(`api/${tableName}`).then((res) => {
         return res.data
@@ -7,6 +8,19 @@ async function GetData(tableName) {
         throw new Error(err.response.data || 'Server Error')
     })
     return await data
+}
+
+async function AddToTable(tableName, data) {
+    let authStore = useAuthStore()
+    if (!authStore.isAuth) return 'NotAuth'
+    let result = await axios.post(`api/${tableName}`, data, {
+        headers: { 'token': authStore.userData.token }
+    }).then(res => {
+        return res.data
+    }).catch((err) => {
+        throw new Error(err.response.data || 'Server Error')
+    })
+    return await result
 }
 
 async function GetToken(Login, Password) {
@@ -40,7 +54,7 @@ async function CheckUser() {
 }
 
 export default {
-    GetData, GetToken, GetUserByToken, CheckUser
+    GetData, AddToTable, GetToken, GetUserByToken, CheckUser
 }
 // async function loadPointsList(emergencyList) {
 //     let result = await axios(`${apiName}/Позиції НС`)
