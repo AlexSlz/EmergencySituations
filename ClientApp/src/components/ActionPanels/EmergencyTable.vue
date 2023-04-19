@@ -10,7 +10,7 @@
   <h1>Тип надзвичайної ситуації</h1>
   <my-combo v-model="element.type" tableName="EmergencyType" />
   <h1>Зображення</h1>
-  <input type="file" accept="image/png, image/gif, image/jpeg" />
+  <file-input v-model="element.image" tableName="Emergency" />
   <h1>Збитки</h1>
   <input v-model="element.costs" type="number" />
 
@@ -34,7 +34,7 @@ export default {
   },
   beforeMount() {
     if (this.element.dateAndTime == undefined) this.element.dateAndTime = new Date().toJSON().slice(0, 19)
-    if (this.element.positions == undefined) this.element.positions = this.emergency.tempPoints
+    if (this.element.positions == undefined) this.element.positions = []
   },
 }
 </script>

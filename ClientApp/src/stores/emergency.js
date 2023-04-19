@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
-import database from '@/main/database'
 
 export const useEmergencyStore = defineStore('emergency', () => {
     const list = ref([])
     const selected = ref(null)
     const colorBy = ref('type')
     const tempPoints = ref([])
+    const reLoad = ref({})
 
     function select(element) {
         if (element === undefined) return
@@ -24,5 +24,5 @@ export const useEmergencyStore = defineStore('emergency', () => {
     //     return await result
     // }
 
-    return { list, selected, select, colorBy, tempPoints }
+    return { list, selected, select, colorBy, tempPoints, reLoad }
 })

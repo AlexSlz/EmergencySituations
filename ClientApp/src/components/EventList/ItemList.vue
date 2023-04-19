@@ -5,6 +5,7 @@
       <span class="text-sm tracking-normal whitespace-nowrap text-myMain">{{ getTime(data.dateAndTime) }}</span>
     </p>
     <p class="line-clamp-3 text-mySecondText">{{ data.description }}</p>
+    <img v-show="imgLoad" :src="getImage(data.image)" @load="imgLoad = true" />
   </div>
 </template>
 <script>
@@ -21,6 +22,9 @@ export default {
     }
   },
   methods: {
+    getImage(id) {
+      if (id != '') return `${window.location.origin}/api/file/Emergency/${id}`
+    },
     getTime(time) {
       var result = time.replace('T', ' ')
       var temp = result.split(' ', 2)

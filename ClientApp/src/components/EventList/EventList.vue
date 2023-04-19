@@ -11,6 +11,10 @@ import database from '@/main/database'
     <div v-if="emergency.selected != null">
       <input @click="emergency.select(null)" value="Назад" type="button" />
       <ItemInfo :element="emergency.selected" />
+      <template v-if="isAuth">
+        <button @click="actionPanel.open({ selected: emergency.selected, tableName: 'Emergency' })">Edit</button>
+        <button class="bg-myRed" @click="DeleteData">Delete</button>
+      </template>
     </div>
     <template v-else>
       <button v-if="isAuth" @click="actionPanel.open()">Add New</button>
@@ -35,16 +39,32 @@ export default {
       message: 'Loading...',
     }
   },
+  methods: {
+    async loadEmergency() {
+      await database
+        .GetData('Emergency')
+        .then((res) => {
+          this.emergency.list = res
+          console.log(res)
+          this.message = 'Список порожній.'
+        })
+        .catch((e) => {
+          this.message = e
+        })
+        .finally(() => {
+          this.emergency.select(null)
+        })
+    },
+    DeleteData() {
+      console.log(this.emergency.selected)
+      database.DeleteData('Emergency', this.emergency.selected).then((e) => {
+        this.loadEmergency()
+      })
+    },
+  },
   beforeMount() {
-    database
-      .GetData('Emergency')
-      .then((res) => {
-        this.emergency.list = res
-        this.message = 'Список порожній.'
-      })
-      .catch((e) => {
-        this.message = e
-      })
+    this.emergency.reLoad = this.loadEmergency
+    this.loadEmergency()
   },
 }
 </script>

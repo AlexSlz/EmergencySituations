@@ -4,6 +4,7 @@
 
 <script>
 import { useEmergencyStore } from '@/stores/emergency'
+import { useActionPanel } from '@/stores/actionPanel'
 import color from '@/main/color'
 import L from 'leaflet'
 import geo from '@/main/geo'
@@ -21,6 +22,7 @@ export default {
       markerList: [],
       tempList: [],
       emergency: useEmergencyStore(),
+      actionPanel: useActionPanel(),
     }
   },
   mounted() {
@@ -149,10 +151,11 @@ export default {
         this.displayMarkers(this.emergency.list)
       },
     },
-    'emergency.tempPoints.length': {
+    'actionPanel.selected.positions.length': {
       deep: true,
       handler() {
-        if (this.emergency.tempPoints != undefined) this.displayNewMarkers(this.emergency.tempPoints)
+        if (this.actionPanel.selected.positions != undefined) this.displayNewMarkers(this.actionPanel.selected.positions)
+        else this.deleteMarkers(this.tempList)
       },
     },
   },

@@ -3,28 +3,28 @@ import { ref } from 'vue'
 
 export const useActionPanel = defineStore('actionPanel', () => {
     const show = ref(false)
-    const name = ref('Add')
+    const name = ref('')
     const tableName = ref('Emergency')
     const fullPage = ref(false)
     const selected = ref({})
 
     function open(obj) {
         show.value = true
+        name.value = 'Add'
         if (obj == undefined) {
-            name.value = 'Add'
             tableName.value = 'Emergency'
             fullPage.value = false
             selected.value = {}
             return
         }
-        if ('name' in obj)
-            name.value = obj['name']
         if ('tableName' in obj)
             tableName.value = obj['tableName']
         if ('fullPage' in obj)
             fullPage.value = obj['fullPage']
-        if ('element' in obj)
-            selected.value = obj['element']
+        if ('selected' in obj && obj['selected']) {
+            selected.value = JSON.parse(JSON.stringify(obj['selected']))
+            name.value = 'Edit'
+        }
     }
 
 

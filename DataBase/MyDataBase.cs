@@ -62,30 +62,30 @@ namespace EmergencySituations.DataBase
             }
         }
 
-        public static string Insert(IDBTable obj, params string[] deleteKey)
+        public static string Insert(IDBTable obj)
         {
             var data = MyDBExtension.GetClassData(obj);
             if (data.data.Count <= 0) return "Zero";
-            foreach (var key in deleteKey)
-            {
-                data.data.Remove(key);
-            }
             string q = $"INSERT INTO [{data.tableName}] ([{String.Join("], [", data.data.Keys.ToArray())}]) VALUES ({String.Join(", ", data.data.Values.Select(i => "?").ToArray())})";
             return ExecuteNonQuery(q, data.data);
         }
 
         public static string Update(IDBTable obj)
         {
+            if(obj.Id <= 0)
+            {
+                Console.WriteLine(obj.Id);
+                return Insert(obj);
+            }
+
             var data = MyDBExtension.GetClassData(obj);
             var temp = data.data.Select(x => $"[{x.Key}] = @{x.Key}").ToArray();
             string q = $@"UPDATE [{data.tableName}] SET {String.Join(", ", temp)} WHERE Id = {obj.Id}";
-            Console.WriteLine(q);
             return ExecuteNonQuery(q, data.data);
         }
 
         public static string Delete(IDBTable obj)
         {
-
             string q = $"DELETE FROM [{obj.GetType().Name}] WHERE [Id] = {obj.Id}";
             return ExecuteNonQuery(q);
         }
@@ -133,6 +133,20 @@ namespace EmergencySituations.DataBase
             }
         }
 
+        public static IEnumerable<string> GetImageList(string tableName)
+        {
+            string q = $"SELECT Image FROM [{tableName}]";
+            using (var sql = new DataBaseConnection())
+            {
+                var a = new List<string>();
+                sql.CreateCommand(q).Read().ForEach(l =>
+                {
+                    a.Add(l.Select(i => $"{i.Value}").First());
+                });
+                return a;
+            }
+        }
+
         public static Dictionary<string, string> GetTableKeys<T>()
         {
             return typeof(T).GetProperties().Where(i => i.Name != "Sql").ToDictionary(t => t.Name, t => t.PropertyType.Name);
@@ -171,30 +185,11 @@ namespace EmergencySituations.DataBase
             var type = table.GetType();
 
             var data = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(i => $"{i.GetValue(table, null)}" != "" && i.Name != "Id")
+                .Where(i => i.Name != "Id" 
+                                && (RelationKey)i.GetCustomAttribute(typeof(RelationKey)) == null)
                 .ToDictionary(i => i.Name, i => i.GetValue(table, null));
 
             return (tableName: type.Name, data);
-        }
-
-        public static List<object> CheckRelationTable(this IDBTable data)
-        {
-            var table = MyDataBase.GetTableNameList();
-            var properties = data.GetType().GetProperties();
-            List<object> result = new List<object>();
-            foreach ( var property in properties )
-            {
-                var pName = property.PropertyType.Name;
-                if (pName == typeof(List<>).Name)
-                    foreach (var item in table)
-                    {
-                        if (item == property.Name)
-                        {
-                            result.Add(property.GetValue(data));                   
-                        }
-                    }
-            }
-            return result;
         }
 
         public static List<T> ToClass<T>(this List<Dictionary<string, object>> data) where T : IDBTable

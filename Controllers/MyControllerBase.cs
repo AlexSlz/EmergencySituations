@@ -27,15 +27,10 @@ namespace EmergencySituations.Controllers
         {
             return Ok(MyDataBase.Insert(data));
         }
-        [HttpPost("list")]
-        public ActionResult<string> AddToTableList(List<T> data)
-        {
-            return BadRequest("Not Yet.");
-        }
 
         [HttpPut]
         [AuthFilter]
-        public ActionResult<string> EditTable(T data)
+        public virtual ActionResult<string> EditTable(T data)
         {
             return Ok(MyDataBase.Update(data));
         }

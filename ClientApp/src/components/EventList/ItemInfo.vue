@@ -2,7 +2,6 @@
   <div>
     <slot></slot>
     <h1 class="break-all">{{ element.name }}</h1>
-
     <template v-if="authStore.isAuth">
       <h1>WOW</h1>
     </template>
