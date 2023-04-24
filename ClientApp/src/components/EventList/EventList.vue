@@ -45,7 +45,6 @@ export default {
         .GetData('Emergency')
         .then((res) => {
           this.emergency.list = res
-          console.log(res)
           this.message = 'Список порожній.'
         })
         .catch((e) => {

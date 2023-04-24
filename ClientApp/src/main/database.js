@@ -111,8 +111,18 @@ async function DeleteFiles(tableName) {
     })
 }
 
+async function GetStatistic(type) {
+    return await axios(`api/statistic/${type}`).then((res) => {
+        return res.data
+    }).catch((err) => {
+        throw new Error(err.response.data || 'Server Error')
+    })
+}
+
+
 export default {
-    GetData, AddToTable, EditTable, DeleteData, GetToken, GetUserByToken, CheckUser, UploadFile, DeleteFiles
+    GetData, AddToTable, EditTable, DeleteData, GetToken, GetUserByToken, CheckUser, UploadFile, DeleteFiles,
+    GetStatistic
 }
 
 

@@ -19,11 +19,11 @@ export default {
     }
   },
   created() {
-    this.tabs.push({ name: 'Map', fold: true, onlyMobile: true })
+    this.tabs.push({ name: 'Map', fold: '', onlyMobile: true })
   },
   methods: {
     selectTab(selectedTab) {
-      if (selectedTab.isActive) selectedTab.tabClick()
+      if (selectedTab.isActive && !selectedTab.onlyMobile) selectedTab.tabClick()
       this.fold = 'fold' in selectedTab
       this.tabs.forEach((tab) => {
         tab.isActive = tab.name == selectedTab.name
@@ -40,7 +40,7 @@ export default {
   @apply h-auto;
 }
 .tabs {
-  @apply relative overflow-hidden bg-mySecond flex justify-center m-2;
+  @apply overflow-hidden bg-mySecond flex flex-wrap justify-center m-2;
 }
 .tabs li {
   @apply text-center p-2 text-base; /*float-left list-item*/

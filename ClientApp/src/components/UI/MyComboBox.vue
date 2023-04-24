@@ -25,6 +25,8 @@ export default {
   },
   methods: {
     changeCombo(e) {
+      console.log(e.target.value)
+      this.$emit('onChange', e.target.value)
       this.$emit('update:modelValue', e.target.value)
     },
     checkValue() {
@@ -34,6 +36,7 @@ export default {
       }
     },
   },
+  emits: ['onChange'],
   watch: {
     tableName: {
       immediate: true,

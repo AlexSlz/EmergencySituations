@@ -6,6 +6,7 @@ import MyPanel from '@/components/Panel/PanelBody.vue'
 import Tab from '@/components/Panel/PanelTab.vue'
 import Login from '@/components/Login.vue'
 import ActionPanel from '@/components/ActionPanels/ActionPanel.vue'
+import Statistic from '@/components/Statistic.vue'
 
 import { useEmergencyStore } from '@/stores/emergency'
 import { useAuthStore } from '@/stores/auth'
@@ -19,6 +20,7 @@ import database from '@/main/database'
     <Tab @onTabClick="emergency.select(null)" name="Події" :selected="true">
       <EventList ref="list" :isAuth="authStore.isAuth" />
     </Tab>
+    <Tab fullPage="true" name="Статистика"><Statistic /></Tab>
     <Tab name="Позначення"><Notation /></Tab>
     <template v-if="!authStore.isAuth">
       <Tab v-if="!authStore.isAuth" name="Login"><Login /></Tab>
