@@ -1,6 +1,6 @@
 <template>
-  <button ref="myBtn" @click="Get()">Update</button>
-  <select v-model="select" @change="Get()">
+  <button ref="myBtn" @click="GetStatistic()">Update</button>
+  <select v-model="select" @change="GetStatistic()">
     <option class="text-mySecond" :value="item" v-for="item in type">{{ item }}</option>
   </select>
   <myTable :first="true" :headers="h" :body="b" />
@@ -18,9 +18,10 @@ export default {
     }
   },
   methods: {
-    Get() {
+    GetStatistic() {
       database.GetStatistic(this.select).then((i) => {
-        console.log(i)
+        if (i.length == 0) return
+
         this.h = ['', 'За весь час'].concat(i.map((h) => this.getMonthName(h['Дата'])))
         this.b = this.flipObject(i)
         this.$refs.myBtn.disabled = true
@@ -38,7 +39,7 @@ export default {
           if (typeof data[0][key] == 'object') {
             Object.keys(data[0][key]).forEach((k) => {
               let count = data.map((t) => t[key][k]).reduce((p, a) => p + a, 0)
-              res.push([k, count].concat(data.map((h) => h[key][k])))
+              res.push([k + ' ' + key, count].concat(data.map((h) => h[key][k])))
             })
           } else {
             res.push(temp)
@@ -58,7 +59,7 @@ export default {
     },
   },
   mounted() {
-    this.Get()
+    this.GetStatistic()
   },
 }
 </script>

@@ -6,8 +6,8 @@
       <p>{{ item.x.toFixed(3) }} | {{ item.y.toFixed(3) }}</p>
       <button @click="RemoveItem(i)">Remove</button>
     </div>
+    <button @click="AddItem">Add</button>
   </div>
-  <button @click="AddItem">Add</button>
 </template>
 <script>
 export default {

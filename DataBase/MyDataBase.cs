@@ -43,6 +43,7 @@ namespace EmergencySituations.DataBase
 
             ExecuteNonQuery(Positions.Sql);
             ExecuteNonQuery(Emergency.Sql);
+            ExecuteNonQuery(Losses.Sql);
         }
 
         private static string ExecuteNonQuery(string q, Dictionary<string, object> args = null)
@@ -74,7 +75,6 @@ namespace EmergencySituations.DataBase
         {
             if(obj.Id <= 0)
             {
-                Console.WriteLine(obj.Id);
                 return Insert(obj);
             }
 
@@ -147,6 +147,15 @@ namespace EmergencySituations.DataBase
             }
         }
 
+        public static int GetLastId(string tableName)
+        {
+            string q = $"SELECT MAX(id) FROM  [{tableName}]";
+            using (var sql = new DataBaseConnection())
+            {
+                return Convert.ToInt32(sql.CreateCommand(q).ExecuteScalar());
+            }
+        }
+
         public static Dictionary<string, string> GetTableKeys<T>()
         {
             return typeof(T).GetProperties().Where(i => i.Name != "Sql").ToDictionary(t => t.Name, t => t.PropertyType.Name);
@@ -187,7 +196,22 @@ namespace EmergencySituations.DataBase
             var data = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(i => i.Name != "Id" 
                                 && (RelationKey)i.GetCustomAttribute(typeof(RelationKey)) == null)
-                .ToDictionary(i => i.Name, i => i.GetValue(table, null));
+                .ToDictionary(i => i.Name, i =>
+                {
+                    var temp = tables.ToList().Find(t => t == i.Name);
+                    if(temp != null)
+                    {
+                        
+                        var l = (IDBTable)i.GetValue(table, null);
+                        if (l.Id == 0)
+                        {
+                            MyDataBase.Insert((IDBTable)i.GetValue(table, null));
+                            l.Id = MyDataBase.GetLastId(i.PropertyType.Name);
+                        }
+                        return l.Id;
+                    }
+                    return i.GetValue(table, null);
+                });
 
             return (tableName: type.Name, data);
         }
@@ -199,26 +223,40 @@ namespace EmergencySituations.DataBase
             return data.Select(row =>
             {
                 var cls = Activator.CreateInstance<T>();
+                bool skip = false;
                 foreach (var property in properties)
                 {
-                    Type type = null;
                     var pName = property.PropertyType.Name;
-                    if (pName == typeof(List<>).Name)
-                        foreach (var item in table)
+                    foreach (var item in table)
+                    {
+                        if (item == property.Name)
                         {
-                            if (item == property.Name)
-                                type = property.PropertyType.GetGenericArguments()[0];
+                            if (pName == typeof(List<>).Name)
+                            {
+                                var type = property.PropertyType.GetGenericArguments()[0];
+                                var temp = (RelationKey)property.GetCustomAttribute(typeof(RelationKey));
+                                if (temp != null)
+                                {
+                                    property.SetValue(cls, MyDataBase
+                                        .SelectTable(type, $"SELECT * FROM {type.Name} WHERE [{temp.KeyName}] = {((T)cls).Id}"));
+                                }
+                                skip = true;
+                            }
+                            else
+                            {
+                                var type = property.PropertyType;
+                                var temp = row[type.Name];
+                                if(temp != System.DBNull.Value)
+                                property.SetValue(cls, MyDataBase.SelectTable(type, $"SELECT * FROM {type.Name} WHERE [Id] = {temp}")[0]);
+                                skip = true;
+                            }
                         }
-                    if (row.ContainsKey(property.Name))
+                    }
+
+                    if (row.ContainsKey(property.Name) && !skip)
                     {
                         var value = Convert.ChangeType(row[property.Name], property.PropertyType);
                         property.SetValue(cls, value);
-                    }
-                    if(type != null)
-                    {
-                        var temp = (RelationKey)property.GetCustomAttribute(typeof(RelationKey));
-                        if(temp != null)
-                            property.SetValue(cls, MyDataBase.SelectTable(type, $"SELECT * FROM {type.Name} WHERE [{temp.KeyName}] = {((T)cls).Id}"));
                     }
                 }
                 return cls;

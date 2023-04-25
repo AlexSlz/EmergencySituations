@@ -20,12 +20,12 @@ export default {
   methods: {
     confirm() {
       console.log(this.actionPanel.selected)
-      if (this.actionPanel.name == 'Add') {
-        database.AddToTable(this.actionPanel.tableName, this.actionPanel.selected).then((res) => {
+      if ('id' in this.actionPanel.selected) {
+        database.EditTable(this.actionPanel.tableName, this.actionPanel.selected).then((res) => {
           this.onComplete()
         })
-      } else if (this.actionPanel.name == 'Edit') {
-        database.EditTable(this.actionPanel.tableName, this.actionPanel.selected).then((res) => {
+      } else {
+        database.AddToTable(this.actionPanel.tableName, this.actionPanel.selected).then((res) => {
           this.onComplete()
         })
       }

@@ -9,7 +9,8 @@
         public string Level { get; set; }
         public string Type { get; set; }
         public string Image { get; set; }
-        public int Costs { get; set; }
+        public Losses Losses { get; set; }
+
         [RelationKey("EmergencyId")]
         public List<Positions> Positions { get; set; }
         public int AddedBy { get; set; }
@@ -23,7 +24,7 @@
 	            ""Level""	TEXT NOT NULL,
 	            ""Type""	TEXT NOT NULL,
 	            ""Image""	TEXT,
-	            ""Costs""	INTEGER,
+	            ""Losses""	INTEGER,
 	            ""AddedBy""	INTEGER,
 
 	            FOREIGN KEY(""Level"") REFERENCES ""EmergencyLevel""(""Name""),

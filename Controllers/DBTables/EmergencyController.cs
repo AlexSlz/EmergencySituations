@@ -27,16 +27,21 @@ namespace EmergencySituations.Controllers.DBTables
         {
             if (data.Positions != null)
             {
-                var difference = MyDataBase.Select<Emergency>().Find(i => i.Id == data.Id).Positions
-                    .FindAll(old =>
-                    {
-                        return !data.Positions.Any(n => n.Id == old.Id);
-                    });
-                difference.ForEach(e =>
+                var find = MyDataBase.Select<Emergency>().Find(i => i.Id == data.Id);
+                if (find != null)
                 {
-                    MyDataBase.Delete(e);
-                    data.Positions.Remove(e);
-                });
+                    var difference = find.Positions
+                        .FindAll(old =>
+                        {
+                            return !data.Positions.Any(n => n.Id == old.Id);
+                        });
+
+                    difference.ForEach(e =>
+                    {
+                        MyDataBase.Delete(e);
+                        data.Positions.Remove(e);
+                    });
+                }
             }
             List<Positions> positions = data.Positions;
             MyDataBase.Update(data);

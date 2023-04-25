@@ -27,22 +27,25 @@ namespace EmergencySituations.Controllers
             return data.GroupBy(i => i.DateAndTime.GetType().GetProperty(type).GetValue(i.DateAndTime)).Select(i =>
             {
                 var date = i.Select(a => a.DateAndTime.GetType().GetProperty(type).GetValue(a.DateAndTime)).First();
+                var current = data.Where(i => int.Parse(i.DateAndTime.GetType().GetProperty(type).GetValue(i.DateAndTime).ToString()) == int.Parse(date.ToString()));
                 var temp = new Dictionary<string, object> { { "Дата", date }, { "Усього", i.Count() } };
 
-                temp.Add("level", getCount(date, levels, data, type));
-                temp.Add("type", getCount(date, types, data, type));
+                temp.Add("Рівень", getCount(current, levels));
+                temp.Add("Тип", getCount(current, types));
+
+                temp.Add("Збитки",current.Select(i => i.Losses.Costs).Sum());
 
                 return temp;
             });
 
         }
 
-        private Dictionary<string, int> getCount(object date, IEnumerable<string> names, List<Emergency> data, string type)
+        private Dictionary<string, int> getCount(IEnumerable<Emergency> current, IEnumerable<string> names)
         {
             var temp = new Dictionary<string, int>();
             foreach (var name in names)
             {
-                temp.Add(name, data.Where(i => (i.Level == name || i.Type == name) && int.Parse(i.DateAndTime.GetType().GetProperty(type).GetValue(i.DateAndTime).ToString()) == int.Parse(date.ToString())).Count());
+                temp.Add(name, current.Where(i => i.Level == name || i.Type == name).Count());
             }
             return temp;
         }
