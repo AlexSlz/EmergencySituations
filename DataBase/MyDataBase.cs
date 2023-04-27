@@ -1,12 +1,8 @@
 ﻿using EmergencySituations.Auth;
 using EmergencySituations.DataBase.Model;
-using System;
 using System.Data;
 using System.Data.SQLite;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Reflection.PortableExecutable;
-using System.Xml;
 
 namespace EmergencySituations.DataBase
 {
@@ -18,7 +14,7 @@ namespace EmergencySituations.DataBase
         {
             sqlConfig = databasePath + ";foreign keys=true";
             ExecuteNonQuery(Users.Sql);
-            if(Count<Users>() <= 0)
+            if (Count<Users>() <= 0)
                 Insert(new Users() { Name = "Alex", Login = "Admin", Password = "123" });
 
             Console.WriteLine(Token.GenerateToken("Alex"));
@@ -73,7 +69,7 @@ namespace EmergencySituations.DataBase
 
         public static string Update(IDBTable obj)
         {
-            if(obj.Id <= 0)
+            if (obj.Id <= 0)
             {
                 return Insert(obj);
             }
@@ -99,8 +95,8 @@ namespace EmergencySituations.DataBase
 
         public static List<T> Select<T>(string q = "") where T : IDBTable
         {
-            if(string.IsNullOrEmpty(q))
-            q = $"SELECT * FROM {typeof(T).Name}";
+            if (string.IsNullOrEmpty(q))
+                q = $"SELECT * FROM {typeof(T).Name}";
             using (var sql = new DataBaseConnection())
             {
                 return sql.CreateCommand(q).Read().ToClass<T>();
@@ -121,7 +117,7 @@ namespace EmergencySituations.DataBase
             {
                 return Convert.ToInt32(sql.CreateCommand(q).ExecuteScalar());
             }
-        } 
+        }
 
         public static IEnumerable<string> GetTableNameList()
         {
@@ -175,8 +171,8 @@ namespace EmergencySituations.DataBase
                     Dictionary<string, object> data = new Dictionary<string, object>();
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        var value = reader.GetFieldType(i).Name == "DateTime" ? 
-                            reader.GetString(i) 
+                        var value = reader.GetFieldType(i).Name == "DateTime" ?
+                            reader.GetString(i)
                             : reader[i];
                         data.Add(reader.GetName(i), value);
                     }
@@ -194,14 +190,14 @@ namespace EmergencySituations.DataBase
             var type = table.GetType();
 
             var data = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(i => i.Name != "Id" 
+                .Where(i => i.Name != "Id"
                                 && (RelationKey)i.GetCustomAttribute(typeof(RelationKey)) == null)
                 .ToDictionary(i => i.Name, i =>
                 {
                     var temp = tables.ToList().Find(t => t == i.Name);
-                    if(temp != null)
+                    if (temp != null)
                     {
-                        
+
                         var l = (IDBTable)i.GetValue(table, null);
                         if (l.Id == 0)
                         {
@@ -246,8 +242,8 @@ namespace EmergencySituations.DataBase
                             {
                                 var type = property.PropertyType;
                                 var temp = row[type.Name];
-                                if(temp != System.DBNull.Value)
-                                property.SetValue(cls, MyDataBase.SelectTable(type, $"SELECT * FROM {type.Name} WHERE [Id] = {temp}")[0]);
+                                if (temp != System.DBNull.Value)
+                                    property.SetValue(cls, MyDataBase.SelectTable(type, $"SELECT * FROM {type.Name} WHERE [Id] = {temp}")[0]);
                                 skip = true;
                             }
                         }

@@ -15,7 +15,7 @@ namespace EmergencySituations.DataBase
         public SQLiteCommand CreateCommand(string q, Dictionary<string, object> args = null)
         {
             SQLiteCommand cmd = new SQLiteCommand(q, _connection);
-            if(args != null)
+            if (args != null)
                 foreach (var a in args)
                 {
                     cmd.Parameters.AddWithValue("@" + a.Key, a.Value);

@@ -1,5 +1,4 @@
 ﻿using EmergencySituations.Model;
-using System.Text;
 
 namespace EmergencySituations.Auth
 {

@@ -10,7 +10,7 @@ namespace EmergencySituations.Controllers
         [HttpGet]
         public ActionResult<string> GetTableData(int id = 0)
         {
-            if(id >= 1)
+            if (id >= 1)
                 return Ok(MyDataBase.Select<T>().Where(x => x.Id == id));
             return Ok(MyDataBase.Select<T>());
         }

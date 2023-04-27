@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
 
-		public int AffectedPerson { get; set; }
+        public int AffectedPerson { get; set; }
         public int DeadPerson { get; set; }
         public int AffectedAnimals { get; set; }
         public int DeadAnimals { get; set; }

@@ -33,7 +33,7 @@ namespace EmergencySituations.Controllers
                 temp.Add("Рівень", getCount(current, levels));
                 temp.Add("Тип", getCount(current, types));
 
-                temp.Add("Збитки",current.Select(i => i.Losses.Costs).Sum());
+                temp.Add("Збитки", current.Select(i => i.Losses.Costs).Sum());
 
                 return temp;
             });

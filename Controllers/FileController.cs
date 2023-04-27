@@ -1,5 +1,6 @@
 ﻿using EmergencySituations.Auth;
 using EmergencySituations.DataBase;
+using EmergencySituations.Other;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 
@@ -48,6 +49,35 @@ namespace EmergencySituations.Controllers
             return File(b, fileType);
         }
 
+        [HttpGet("report")]
+        //[AuthFilter]
+        public ActionResult<string> GetReport(DateTime date)
+        {
+            string path = Path.Combine(_environment.WebRootPath, "reports");
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            string filePath = Path.Combine(path, "temp.docx");
+            FileManager.CreateDoc(filePath, date);
+
+            byte[] b = System.IO.File.ReadAllBytes(filePath);
+            new FileExtensionContentTypeProvider().TryGetContentType(filePath, out var fileType);
+            return File(b, fileType);
+        }
+
+        [HttpGet("report/Get")]
+        //[AuthFilter]
+        public ActionResult<string> Ge()
+        {
+            string path = Path.Combine(_environment.WebRootPath, "reports");
+            string filePath = Path.Combine(path, "temp.docx");
+
+            byte[] b = System.IO.File.ReadAllBytes(filePath);
+            new FileExtensionContentTypeProvider().TryGetContentType(filePath, out var fileType);
+            return File(b, fileType);
+        }
+
         [HttpGet("{table}")]
         [AuthFilter]
         public ActionResult<string> RemoveFile(string table)
@@ -65,5 +95,6 @@ namespace EmergencySituations.Controllers
             });
             return Ok(fileToDelete);
         }
+
     }
 }

@@ -1,5 +1,4 @@
-﻿using EmergencySituations.Auth;
-using EmergencySituations.DataBase.Model;
+﻿using EmergencySituations.DataBase.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmergencySituations.Controllers.DBTables

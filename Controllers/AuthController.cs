@@ -14,7 +14,7 @@ namespace EmergencySituations.Controllers
         public ActionResult<string> Auth(UserDto req)
         {
             var user = MyDataBase.Select<Users>().FirstOrDefault(u => u.Login == req.Login && u.Password.ToString() == req.Password);
-            
+
             if (user == null)
                 return BadRequest("User Not Found");
             return Token.GenerateToken(user.Login);
