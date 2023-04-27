@@ -111,8 +111,11 @@ async function DeleteFiles(tableName) {
     })
 }
 
-async function GetStatistic(type) {
-    return await axios(`api/statistic/${type}`).then((res) => {
+async function GetStatistic(year) {
+    var api = 'api/statistic/'
+    if (year > 0)
+        api += `?year=${year}`
+    return await axios(api).then((res) => {
         return res.data
     }).catch((err) => {
         throw new Error(err.response.data || 'Server Error')

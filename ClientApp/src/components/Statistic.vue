@@ -1,9 +1,11 @@
 <template>
   <button ref="myBtn" @click="GetStatistic()">Update</button>
-  <select v-model="select" @change="GetStatistic()">
-    <option class="text-mySecond" :value="item" v-for="item in type">{{ item }}</option>
-  </select>
-  <myTable :first="true" :headers="h" :body="b" />
+
+  <myTable :headers="table1[0]" :body="table1[1]" />
+  <h1 class="p-3">Кількість подій за рівнем:</h1>
+  <myTable :headers="table2[0]" :body="table2[1]" />
+  <h1 class="p-3">Кількість подій за типом:</h1>
+  <myTable :headers="table3[0]" :body="table3[1]" />
 </template>
 
 <script>
@@ -11,23 +13,35 @@ import database from '@/main/database'
 export default {
   data() {
     return {
-      h: [],
-      b: [],
-      type: ['Місяць', 'Рік'],
-      select: 'Місяць',
+      table1: [['Дата', 'Усього', 'Збитки'], []],
+      table2: [[], []],
+      table3: [[], []],
     }
   },
   methods: {
     GetStatistic() {
-      database.GetStatistic(this.select).then((i) => {
+      database.GetStatistic(0).then((i) => {
+        console.log(i)
         if (i.length == 0) return
 
-        this.h = ['', 'За весь час'].concat(i.map((h) => this.getMonthName(h['Дата'])))
-        this.b = this.flipObject(i)
-        this.$refs.myBtn.disabled = true
-        setTimeout(() => {
-          this.$refs.myBtn.disabled = false
-        }, 5000)
+        this.table2[0] = ['Дата'].concat(Object.keys(i[0].level))
+        this.table3[0] = ['Дата'].concat(Object.keys(i[0].type))
+
+        this.table1[1] = []
+        this.table2[1] = []
+        this.table3[1] = []
+        i.forEach((element) => {
+          this.table1[1].push([this.getMonthName(element.date), element.totalCount, element.costs])
+          this.table2[1].push([this.getMonthName(element.date)].concat(Object.values(element.level)))
+          this.table3[1].push([this.getMonthName(element.date)].concat(Object.values(element.type)))
+        })
+
+        // this.h = ['', 'За весь час'].concat(i.map((h) => this.getMonthName(h['Дата'])))
+        // this.b = this.flipObject(i)
+        // this.$refs.myBtn.disabled = true
+        // setTimeout(() => {
+        //   this.$refs.myBtn.disabled = false
+        // }, 5000)
       })
     },
     flipObject(data) {
@@ -52,7 +66,7 @@ export default {
       const date = new Date()
       date.setMonth(monthNumber - 1)
 
-      if (this.select != this.type[0]) return monthNumber
+      if (monthNumber > 1000) return monthNumber
       return date.toLocaleString('uk-UA', {
         month: 'long',
       })

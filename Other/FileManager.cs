@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using EmergencySituations.Controllers;
 using EmergencySituations.DataBase;
 using EmergencySituations.DataBase.Model;
 
@@ -8,26 +9,90 @@ namespace EmergencySituations.Other
 {
     public static class FileManager
     {
-        public static bool CreateDoc(string fileName, DateTime date)
+        public static bool CreateDoc(string fileName, int year, int month = 0)
         {
             using (WordprocessingDocument doc = WordprocessingDocument.Create(fileName, WordprocessingDocumentType.Document, true))
             {
-                var emergency = MyDataBase.Select<Emergency>().Where(i => i.DateAndTime.Date == date.Date);
+                var emergency = MyDataBase.Select<Emergency>().Where(i => i.DateAndTime.Year == year);
+                if (emergency.Count() <= 0)
+                    return false;
+                var statistic = StatisticController.GetData(0).Where(y => y.Date == year).First();
+                var text = $"{year} рік";
+                if(month > 0)
+                {
+                    emergency = emergency.Where(i => i.DateAndTime.Month == month);
+                    if (emergency.Count() <= 0)
+                        return false;
+                    statistic = StatisticController.GetData(year).Where(m => m.Date == month).First();
+                    text = $"{new DateTime(2002, month, 28).ToString("MMMM")} {year}";
+                }
                 MainDocumentPart mainPart = doc.AddMainDocumentPart();
                 mainPart.Document = new Document();
                 Body body = mainPart.Document.AppendChild(new Body());
                 SectionProperties props = new SectionProperties();
                 body.AppendChild(props);
 
-                AddText(doc, CreateText("ABOBA", 14 , true));
+                AddText(doc, CreateText($"Звіт за {text}", 16, true));
+                AddText(doc, CreateText(""));
+                AddText(doc, CreateText($"- Усього подій: {statistic.TotalCount}", 16));
+                AddText(doc, CreateText($"- Збитки: {statistic.Costs}", 16));
 
-                AddText(doc, CreateText("BOBA", 14, false, new Bold()));
+                AddText(doc, CreateText("Кількість подій за рівнем:"));
+                InsertWordTable(doc, statistic.Level.ToTable());
 
+                AddText(doc, CreateText("Кількість подій за типом:"));
+                InsertWordTable(doc, statistic.Type.ToTable());
 
-                InsertWordTable(doc, new string[,] { { "1", "2", "C" }, { "A", "B", "3" } });
+                AddText(doc, CreateText(""));
+                AddText(doc, CreateText(""));
+                AddText(doc, CreateText(""));
+                int i = 1;
+                foreach (var e in emergency)
+                {
+                    CreateEmergencyData(doc, e, i++);
+                    AddText(doc, CreateText(""));
+                }
 
+                statistic = null;
+                emergency = null;
             }
             return true;
+        }
+
+
+        private static string CheckInfo(string text)
+        {
+            return (string.IsNullOrEmpty(text) ? "Інформації немає" : text);
+        }
+
+        private static void CreateEmergencyData(WordprocessingDocument doc, Emergency emergency, int id)
+        {
+            AddText(doc, CreateText($"{id}. {emergency.Name} - {emergency.DateAndTime.ToString("D")} | {emergency.DateAndTime.ToString("t")}"));
+            
+            AddText(doc, CreateText($"- Опис: {CheckInfo(emergency.Description)}"));
+            AddText(doc, CreateText($"- Рівень: {emergency.Level}"));
+            AddText(doc, CreateText($"- Тип: {emergency.Type}"));
+            AddText(doc, CreateText($"- Розташування: {CheckInfo(String.Join(',', emergency.Positions.Select(i => i.Location)))}"));
+
+            var e = emergency.Losses;
+            AddText(doc, CreateText($"- Збитки: {e.Costs}"));
+            AddText(doc, CreateText($"- Втрати:"));
+            var b = new string[,] {
+                { "Кількість постраждалих осіб", "Кількість загиблих осіб", "Кількість постраждалих тварин", "Кількість загиблих тварин" },
+                { e.AffectedPerson.ToString(), e.DeadPerson.ToString(), e.AffectedAnimals.ToString(), e.DeadAnimals.ToString() } 
+            };
+
+            InsertWordTable(doc, b);
+
+            b = new string[,] {
+                { "Кількість пошкоджених будівель", "Кількість зруйнованих будівель", "Кількість пошкоджених особистих речей", "Кількість знищених особистих речей" },
+                { e.DamagedBuildings.ToString(), e.DestroyedBuildings.ToString(), e.DamagedPersonalItems.ToString(), e.DestroyedPersonalItems.ToString() }
+            };
+
+            InsertWordTable(doc, b);
+
+            e = null;
+            b = null;
         }
 
         private static void AddText(WordprocessingDocument doc, Paragraph paragraph)
@@ -40,21 +105,21 @@ namespace EmergencySituations.Other
         private static Paragraph CreateText(string text, int size = 14, bool center = false, params OpenXmlElement[] ex)
         {
             Paragraph paragraph = new Paragraph();
-
+            string font = "Times New Roman";
             Run run = paragraph.AppendChild(new Run());
             run.AppendChild(new Text(text));
             var prop = new RunProperties(new FontSize() { Val = new StringValue((size * 2).ToString()) },
-                new RunFonts() { Ascii = "Times New Roman" });
+                new RunFonts() { HighAnsi = font, Ascii = font });
             foreach (var e in ex)
             {
                 prop.AddChild(e);
             }
             var pp = new ParagraphProperties();
-            if(center)
+            if (center)
                 pp.AddChild(new Justification() { Val = JustificationValues.Center });
-
-            run.PrependChild(prop);
             paragraph.AppendChild(pp);
+
+            run.RunProperties = prop;
             return paragraph;
         }
 

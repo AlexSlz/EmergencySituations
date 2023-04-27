@@ -201,9 +201,10 @@ namespace EmergencySituations.DataBase
                         var l = (IDBTable)i.GetValue(table, null);
                         if (l.Id == 0)
                         {
-                            MyDataBase.Insert((IDBTable)i.GetValue(table, null));
+                            MyDataBase.Insert(l);
                             l.Id = MyDataBase.GetLastId(i.PropertyType.Name);
                         }
+                        MyDataBase.Update(l);
                         return l.Id;
                     }
                     return i.GetValue(table, null);

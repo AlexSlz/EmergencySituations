@@ -1,6 +1,8 @@
 ﻿using EmergencySituations.DataBase;
 using EmergencySituations.DataBase.Model;
+using EmergencySituations.Other;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace EmergencySituations.Controllers
 {
@@ -8,39 +10,52 @@ namespace EmergencySituations.Controllers
     [ApiController]
     public class StatisticController : ControllerBase
     {
-        [HttpGet("Рік")]
-        public ActionResult<string> Year()
+        [HttpGet]
+        public ActionResult<string> Get(int year = 0)
         {
-            return Ok(GetData("Year"));
+            var temp = GetData(year);
+            if (temp.ToList()[0] == null)
+                return NotFound();
+            return Ok(temp);
         }
-        [HttpGet("Місяць")]
-        public ActionResult<string> Month()
-        {
-            return Ok(GetData("Month"));
-        }
+        
 
-        private IEnumerable<Dictionary<string, object>> GetData(string type)
+        public static IEnumerable<StatisticData> GetData(int year = 0)
         {
             var data = MyDataBase.Select<Emergency>();
             var levels = MyDataBase.Select<EmergencyLevel>().Select(i => i.Name);
             var types = MyDataBase.Select<EmergencyType>().Select(i => i.Name);
-            return data.GroupBy(i => i.DateAndTime.GetType().GetProperty(type).GetValue(i.DateAndTime)).Select(i =>
+            var yearGroup = data.GroupBy(i => i.DateAndTime.Year);
+           
+            return yearGroup.Select(i =>
             {
-                var date = i.Select(a => a.DateAndTime.GetType().GetProperty(type).GetValue(a.DateAndTime)).First();
-                var current = data.Where(i => int.Parse(i.DateAndTime.GetType().GetProperty(type).GetValue(i.DateAndTime).ToString()) == int.Parse(date.ToString()));
-                var temp = new Dictionary<string, object> { { "Дата", date }, { "Усього", i.Count() } };
+                var date = i.Select(a => a.DateAndTime.Year).First();
+                var current = data.Where(i => i.DateAndTime.Year == date);
 
-                temp.Add("Рівень", getCount(current, levels));
-                temp.Add("Тип", getCount(current, types));
+                if(year > 0)
+                {
+                    date = i.Select(a => a.DateAndTime.Month).First();
+                    current = data.Where(i => i.DateAndTime.Year == year && i.DateAndTime.Month == date);
+                    if (current.Count() == 0)
+                        return null;
+                }
 
-                temp.Add("Збитки", current.Select(i => i.Losses.Costs).Sum());
+                var result = new StatisticData() { 
+                    Date = int.Parse(date.ToString()), 
+                    TotalCount = i.Count()  
+                };
 
-                return temp;
+                result.Level = getCount(current, levels);
+                result.Type = getCount(current, types);
+                result.Costs = current.Select(i => i.Losses.Costs).Sum();
+
+                
+                return result;
             });
 
         }
 
-        private Dictionary<string, int> getCount(IEnumerable<Emergency> current, IEnumerable<string> names)
+        private static Dictionary<string, int> getCount(IEnumerable<Emergency> current, IEnumerable<string> names)
         {
             var temp = new Dictionary<string, int>();
             foreach (var name in names)

@@ -3,6 +3,7 @@ using EmergencySituations.DataBase;
 using EmergencySituations.Other;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using System;
 
 namespace EmergencySituations.Controllers
 {
@@ -51,31 +52,32 @@ namespace EmergencySituations.Controllers
 
         [HttpGet("report")]
         //[AuthFilter]
-        public ActionResult<string> GetReport(DateTime date)
+        public ActionResult<string> GetReport(int year, int month = 0)
         {
+            if (!DateTime.TryParse(string.Format("1/1/{0}", year), out var dateTime))
+            {
+                return BadRequest("Error Year");
+            }
+            year = dateTime.Year;
             string path = Path.Combine(_environment.WebRootPath, "reports");
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
             }
             string filePath = Path.Combine(path, "temp.docx");
-            FileManager.CreateDoc(filePath, date);
+            if (!FileManager.CreateDoc(filePath, year, month))
+            {
+                return NotFound();
+            }
 
             byte[] b = System.IO.File.ReadAllBytes(filePath);
             new FileExtensionContentTypeProvider().TryGetContentType(filePath, out var fileType);
-            return File(b, fileType);
-        }
 
-        [HttpGet("report/Get")]
-        //[AuthFilter]
-        public ActionResult<string> Ge()
-        {
-            string path = Path.Combine(_environment.WebRootPath, "reports");
-            string filePath = Path.Combine(path, "temp.docx");
+            var resultName = $"Звіт_{year}.docx";
+            if (month > 0)
+                resultName = $"Звіт_{month}_{year}.docx";
 
-            byte[] b = System.IO.File.ReadAllBytes(filePath);
-            new FileExtensionContentTypeProvider().TryGetContentType(filePath, out var fileType);
-            return File(b, fileType);
+            return File(b, fileType, resultName);
         }
 
         [HttpGet("{table}")]
