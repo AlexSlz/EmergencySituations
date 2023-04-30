@@ -1,7 +1,7 @@
 ﻿using EmergencySituations.Auth;
 using EmergencySituations.DataBase;
 using EmergencySituations.DataBase.Model;
-using EmergencySituations.Model;
+using EmergencySituations.Other.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmergencySituations.Controllers

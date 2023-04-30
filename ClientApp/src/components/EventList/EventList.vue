@@ -44,6 +44,7 @@ export default {
       await database
         .GetData('Emergency')
         .then((res) => {
+          console.log(res)
           this.emergency.list = res
           this.message = 'Список порожній.'
         })

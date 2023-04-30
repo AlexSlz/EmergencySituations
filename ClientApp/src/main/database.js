@@ -18,6 +18,7 @@ async function AddToTable(tableName, data) {
     }).then(res => {
         return res.data
     }).catch((err) => {
+        console.log(err)
         throw new Error(err.response.data || 'Server Error')
     })
     return await result
@@ -40,9 +41,8 @@ async function EditTable(tableName, data) {
 async function DeleteData(tableName, data) {
     let authStore = useAuthStore()
     if (!authStore.isAuth) return 'NotAuth'
-    let result = await axios.delete(`api/${tableName}`, {
+    let result = await axios.delete(`api/${tableName}/${data.id}`, {
         headers: { 'token': authStore.userData.token },
-        data: data
     }).then(res => {
         return res.data
     }).catch((err) => {

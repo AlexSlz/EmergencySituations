@@ -5,10 +5,10 @@
   <textarea v-model="element.description"></textarea>
   <h1>Дата і час</h1>
   <input v-model="element.dateAndTime" type="datetime-local" />
-  <h1>Рівень надзвичайної ситуації</h1>
+  <!-- <h1>Рівень надзвичайної ситуації</h1>
   <my-combo v-model="element.level" tableName="EmergencyLevel" />
   <h1>Тип надзвичайної ситуації</h1>
-  <my-combo v-model="element.type" tableName="EmergencyType" />
+  <my-combo v-model="element.type" tableName="EmergencyType" /> -->
   <h1>Зображення</h1>
   <file-input v-model="element.image" tableName="Emergency" />
 
@@ -33,6 +33,8 @@ export default {
     if (this.element.dateAndTime == undefined) this.element.dateAndTime = new Date().toJSON().slice(0, 19)
     if (this.element.positions == undefined) this.element.positions = []
     if (this.element.losses == undefined) this.element.losses = {}
+    this.element.type = { Id: 1 }
+    this.element.level = { Id: 1 }
   },
   components: { LossesTable },
 }

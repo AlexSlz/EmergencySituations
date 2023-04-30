@@ -14,7 +14,7 @@ namespace EmergencySituations.Controllers
         public ActionResult<string> Get(int year = 0)
         {
             var temp = GetData(year);
-            if (temp.ToList()[0] == null)
+            if (temp == null)
                 return NotFound();
             return Ok(temp);
         }
@@ -60,7 +60,7 @@ namespace EmergencySituations.Controllers
             var temp = new Dictionary<string, int>();
             foreach (var name in names)
             {
-                temp.Add(name, current.Where(i => i.Level == name || i.Type == name).Count());
+                temp.Add(name, current.Where(i => i.Level.Name == name || i.Type.Name == name).Count());
             }
             return temp;
         }

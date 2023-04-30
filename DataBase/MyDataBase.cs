@@ -3,6 +3,8 @@ using EmergencySituations.DataBase.Model;
 using System.Data;
 using System.Data.SQLite;
 using System.Reflection;
+using EmergencySituations.Other.Model;
+
 
 namespace EmergencySituations.DataBase
 {
@@ -42,32 +44,32 @@ namespace EmergencySituations.DataBase
             ExecuteNonQuery(Losses.Sql);
         }
 
-        private static string ExecuteNonQuery(string q, Dictionary<string, object> args = null)
+        private static MyRequestResult ExecuteNonQuery(string q, Dictionary<string, object> args = null)
         {
             try
             {
                 using (DataBaseConnection sql = new DataBaseConnection())
                 {
                     var a = sql.CreateCommand(q, args).ExecuteNonQuery();
-                    return $"Ok, {a}";
+                    return new MyRequestResult($"Ok, {a}");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"{q} \n {ex.Message}");
-                return ex.Message;
+                return new MyRequestResult(ex.Message, true);
             }
         }
 
-        public static string Insert(IDBTable obj)
+        public static MyRequestResult Insert(IDBTable obj)
         {
             var data = MyDBExtension.GetClassData(obj);
-            if (data.data.Count <= 0) return "Zero";
+            if (data.data.Count <= 0) return new MyRequestResult("Zero", true);
             string q = $"INSERT INTO [{data.tableName}] ([{String.Join("], [", data.data.Keys.ToArray())}]) VALUES ({String.Join(", ", data.data.Values.Select(i => "?").ToArray())})";
             return ExecuteNonQuery(q, data.data);
         }
 
-        public static string Update(IDBTable obj)
+        public static MyRequestResult Update(IDBTable obj)
         {
             if (obj.Id <= 0)
             {
@@ -80,17 +82,45 @@ namespace EmergencySituations.DataBase
             return ExecuteNonQuery(q, data.data);
         }
 
-        public static string Delete(IDBTable obj)
+        private static MyRequestResult Delete(string tableName, string id)
         {
-            string q = $"DELETE FROM [{obj.GetType().Name}] WHERE [Id] = {obj.Id}";
+            string q = $"DELETE FROM [{tableName}] WHERE [Id] = {id}";
             return ExecuteNonQuery(q);
         }
 
-        public static string Delete<T>(int id) where T : IDBTable
+        public static MyRequestResult Delete<T>(int id) where T : IDBTable
         {
-            var obj = Activator.CreateInstance<T>();
-            obj.Id = id;
-            return Delete(obj);
+            var element = Select<T>().Where(i => i.Id == id).First();
+            string q = $"DELETE FROM [{typeof(T).Name}] WHERE [Id] = {id}";
+            var result = ExecuteNonQuery(q);
+            if (!result.isError && element != null)
+            {
+               int a = DeleteRelated(element);
+                if (a > 0)
+                    result.Message += $" + {a}"; 
+            }
+
+            return result;
+        }
+
+        private static int DeleteRelated(IDBTable e)
+        {
+            var prop = e.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            int i = 0;
+            foreach (var p in prop)
+            {
+                var a = p.GetCustomAttribute(typeof(RelationKey));
+                if (a != null)
+                {
+                    var key = (RelationKey)a;
+                    if (key.RelationType == RelationType.OneToOne)
+                    {
+                        ExecuteNonQuery($"DELETE FROM [{p.PropertyType.Name}] WHERE [Id] = {((IDBTable)p.GetValue(e, null)).Id}");
+                        i++;
+                    }
+                }
+            }
+            return i;
         }
 
         public static List<T> Select<T>(string q = "") where T : IDBTable
@@ -186,25 +216,28 @@ namespace EmergencySituations.DataBase
 
         public static (string tableName, Dictionary<string, object> data) GetClassData(IDBTable table)
         {
+            var id = table.Id;
             var tables = MyDataBase.GetTableNameList();
             var type = table.GetType();
-
+            var prop = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
             var data = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(i => i.Name != "Id"
-                                && (RelationKey)i.GetCustomAttribute(typeof(RelationKey)) == null)
+                .Where(i => i.Name != "Id" && GetCustomAttribute(i.GetCustomAttribute(typeof(RelationKey))))
                 .ToDictionary(i => i.Name, i =>
                 {
-                    var temp = tables.ToList().Find(t => t == i.Name);
+                    var temp = tables.ToList().Find(t => t == i.PropertyType.Name);
                     if (temp != null)
                     {
-
                         var l = (IDBTable)i.GetValue(table, null);
-                        if (l.Id == 0)
+                        var key = (RelationKey)i.GetCustomAttribute(typeof(RelationKey));
+                        if (l == null)
+                            return null;
+                        if (l.Id == 0 || (l.Id != id && key.RelationType == RelationType.OneToOne))
                         {
                             MyDataBase.Insert(l);
-                            l.Id = MyDataBase.GetLastId(i.PropertyType.Name);
+                            return MyDataBase.GetLastId(i.PropertyType.Name);
                         }
-                        MyDataBase.Update(l);
+                        if(key.RelationType == RelationType.OneToOne)
+                            MyDataBase.Update(l);
                         return l.Id;
                     }
                     return i.GetValue(table, null);
@@ -213,40 +246,39 @@ namespace EmergencySituations.DataBase
             return (tableName: type.Name, data);
         }
 
+        public static bool GetCustomAttribute(Attribute attribute)
+        {
+            if(attribute == null) return true;
+            return ((RelationKey)attribute).RelationType != RelationType.OneToMany;
+        }
+
         public static List<T> ToClass<T>(this List<Dictionary<string, object>> data) where T : IDBTable
         {
-            var table = MyDataBase.GetTableNameList();
-            var properties = typeof(T).GetProperties();
-            return data.Select(row =>
+            var properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+
+            var result = data.Select(row =>
             {
                 var cls = Activator.CreateInstance<T>();
-                bool skip = false;
                 foreach (var property in properties)
                 {
-                    var pName = property.PropertyType.Name;
-                    foreach (var item in table)
+                    bool skip = false;
+                    var temp = (RelationKey)property.GetCustomAttribute(typeof(RelationKey));
+                    if(temp != null)
                     {
-                        if (item == property.Name)
+                        if (temp.RelationType == RelationType.OneToMany)
                         {
-                            if (pName == typeof(List<>).Name)
-                            {
-                                var type = property.PropertyType.GetGenericArguments()[0];
-                                var temp = (RelationKey)property.GetCustomAttribute(typeof(RelationKey));
-                                if (temp != null)
-                                {
-                                    property.SetValue(cls, MyDataBase
-                                        .SelectTable(type, $"SELECT * FROM {type.Name} WHERE [{temp.KeyName}] = {((T)cls).Id}"));
-                                }
-                                skip = true;
-                            }
-                            else
-                            {
-                                var type = property.PropertyType;
-                                var temp = row[type.Name];
-                                if (temp != System.DBNull.Value)
-                                    property.SetValue(cls, MyDataBase.SelectTable(type, $"SELECT * FROM {type.Name} WHERE [Id] = {temp}")[0]);
-                                skip = true;
-                            }
+                            var type = property.PropertyType.GetGenericArguments()[0];
+                            property.SetValue(cls, MyDataBase
+                                .SelectTable(type, $"SELECT * FROM {type.Name} WHERE [{temp.KeyName}] = {((T)cls).Id}"));
+                            skip = true;
+                        }
+                        else
+                        {
+                            var type = property.PropertyType;
+                            var id = row[property.Name];
+                            if (id != System.DBNull.Value)
+                                property.SetValue(cls, MyDataBase.SelectTable(type, $"SELECT * FROM {type.Name} WHERE [Id] = {id}")[0]);
+                            skip = true;
                         }
                     }
 
@@ -258,6 +290,7 @@ namespace EmergencySituations.DataBase
                 }
                 return cls;
             }).ToList();
+            return result;
         }
     }
 }

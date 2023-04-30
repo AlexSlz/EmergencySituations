@@ -1,4 +1,4 @@
-﻿namespace EmergencySituations.Model
+﻿namespace EmergencySituations.Other.Model
 {
     public class UserDto
     {

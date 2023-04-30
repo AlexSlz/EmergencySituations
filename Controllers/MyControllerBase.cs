@@ -25,28 +25,21 @@ namespace EmergencySituations.Controllers
         [AuthFilter]
         public virtual ActionResult<string> AddToTable(T data)
         {
-            return Ok(MyDataBase.Insert(data));
+            return Ok(MyDataBase.Insert(data).Message);
         }
 
         [HttpPut]
         [AuthFilter]
         public virtual ActionResult<string> EditTable(T data)
         {
-            return Ok(MyDataBase.Update(data));
-        }
-
-        [HttpDelete]
-        [AuthFilter]
-        public ActionResult<string> DeleteDataFromTable(T data)
-        {
-            return Ok(MyDataBase.Delete(data));
+            return Ok(MyDataBase.Update(data).Message);
         }
 
         [HttpDelete("{id}")]
         [AuthFilter]
         public ActionResult<string> DeleteDataFromTableByKey(int id)
         {
-            return Ok(MyDataBase.Delete<T>(id));
+            return Ok(MyDataBase.Delete<T>(id).Message);
         }
 
     }

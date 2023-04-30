@@ -1,4 +1,4 @@
-﻿using EmergencySituations.Model;
+﻿using EmergencySituations.Other.Model;
 
 namespace EmergencySituations.Auth
 {
