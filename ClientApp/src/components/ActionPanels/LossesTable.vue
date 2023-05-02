@@ -1,13 +1,8 @@
 <template>
   <h1>Кількість постраждалих осіб</h1>
   <input v-model="element.affectedPerson" type="number" />
-  <h1>Кількість загиблих осіб</h1>
-  <input v-model="element.deadPerson" type="number" />
-
   <h1>Кількість постраждалих тварин</h1>
   <input v-model="element.affectedAnimals" type="number" />
-  <h1>Кількість загиблих тварин</h1>
-  <input v-model="element.deadAnimals" type="number" />
 
   <h1>Кількість зруйнованих будівель</h1>
   <input v-model="element.destroyedBuildings" type="number" />

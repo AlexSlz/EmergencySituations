@@ -141,9 +141,32 @@ async function GetTableNameList() {
     return await res.data
 }
 
+async function CreateReport(year, month = 0) {
+    return await axios({
+        url: `api/file/report?year=${year}&month=${month}`,
+        method: 'GET',
+        responseType: 'blob', // important
+    }).then((res) => {
+        const href = URL.createObjectURL(res.data);
+        const link = document.createElement('a');
+        let fileName = res.headers['content-disposition'].split("UTF-8''")[1]
+        fileName = decodeURIComponent(fileName)
+        link.href = href;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(href);
+        return 'ok'
+    }).catch((err) => {
+        console.log(err)
+        throw new Error(err.response.statusText || 'Server Error')
+    })
+}
+
 export default {
     GetData, AddToTable, EditTable, DeleteData, GetToken, GetUserByToken, CheckUser, UploadFile, DeleteFiles,
-    GetStatistic, GetYears, GetTableNameList
+    GetStatistic, GetYears, GetTableNameList, CreateReport
 }
 
 

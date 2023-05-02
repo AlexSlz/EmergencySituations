@@ -1,5 +1,4 @@
 <template>
-  <p class="p-2 text-myRed">{{ ErrorMsg }}</p>
   <form @submit.prevent="auth()">
     <input type="text" placeholder="Login" v-model="login" />
     <input type="password" placeholder="Password" v-model="pass" />
@@ -9,14 +8,14 @@
 <script>
 import database from '@/main/database'
 import { useAuthStore } from '@/stores/auth'
-
+import { useNotify } from '@/stores/Notify'
 export default {
   data() {
     return {
       login: 'Admin',
       pass: '123',
-      ErrorMsg: '',
       authStore: useAuthStore(),
+      notify: useNotify(),
     }
   },
   methods: {
@@ -26,11 +25,11 @@ export default {
         .then((t) => {
           database.GetUserByToken(t).then((res) => {
             this.authStore.auth(res, t)
+            this.notify.Open('Авторизація успішна.', 'success')
           })
         })
         .catch((e) => {
-          this.ErrorMsg = e
-          this.authStore.logout()
+          this.notify.Open(e, 'error')
         })
     },
   },

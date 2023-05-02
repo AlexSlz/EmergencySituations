@@ -68,30 +68,31 @@ namespace EmergencySituations.Other
 
         private static void CreateEmergencyData(WordprocessingDocument doc, Emergency emergency, int id)
         {
-            AddText(doc, CreateText($"{id}. {emergency.Name} - {emergency.DateAndTime.ToString("D")} | {emergency.DateAndTime.ToString("t")}"));
-            
+            AddText(doc, CreateText($"{id}. {emergency.Name}", 16));
+            AddText(doc, CreateText($"{emergency.DateAndTime.ToString("D")} | {emergency.DateAndTime.ToString("t")}", 14, false, new Italic()));
+            AddText(doc, CreateText(""));
             AddText(doc, CreateText($"- Опис: {CheckInfo(emergency.Description)}"));
-            AddText(doc, CreateText($"- Рівень: {emergency.Level}"));
-            AddText(doc, CreateText($"- Тип: {emergency.Type}"));
-            AddText(doc, CreateText($"- Розташування: {CheckInfo(String.Join(',', emergency.Positions.Select(i => i.Location)))}"));
+            AddText(doc, CreateText($"- Рівень: {emergency.Level.Name}"));
+            AddText(doc, CreateText($"- Тип: {emergency.Type.Name}"));
+            AddText(doc, CreateText($"- Розташування: {CheckInfo(String.Join(',', emergency.Positions.Select(i => i.Location).Distinct()))}"));
 
             var e = emergency.Losses;
             AddText(doc, CreateText($"- Збитки: {e.Costs}"));
             AddText(doc, CreateText($"- Втрати:"));
             var b = new string[,] {
-                { "Кількість постраждалих осіб", "Кількість загиблих осіб", "Кількість постраждалих тварин", "Кількість загиблих тварин" },
-                { e.AffectedPerson.ToString(), e.DeadPerson.ToString(), e.AffectedAnimals.ToString(), e.DeadAnimals.ToString() } 
+                { "Кількість постраждалих осіб", "Кількість постраждалих тварин" },
+                { e.AffectedPerson.ToString(), e.AffectedAnimals.ToString() } 
             };
 
             InsertWordTable(doc, b);
-
+            AddText(doc, CreateText(""));
             b = new string[,] {
                 { "Кількість пошкоджених будівель", "Кількість зруйнованих будівель", "Кількість пошкоджених особистих речей", "Кількість знищених особистих речей" },
                 { e.DamagedBuildings.ToString(), e.DestroyedBuildings.ToString(), e.DamagedPersonalItems.ToString(), e.DestroyedPersonalItems.ToString() }
             };
 
             InsertWordTable(doc, b);
-
+            AddText(doc, CreateText(""));
             e = null;
             b = null;
         }

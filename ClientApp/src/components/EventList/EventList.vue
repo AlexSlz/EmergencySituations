@@ -3,6 +3,7 @@ import ItemInfo from './ItemInfo.vue'
 import ItemList from './ItemList.vue'
 import { useEmergencyStore } from '@/stores/emergency'
 import { useActionPanel } from '@/stores/actionPanel'
+import { useNotify } from '../../stores/Notify'
 import database from '@/main/database'
 </script>
 
@@ -36,6 +37,7 @@ export default {
     return {
       emergency: useEmergencyStore(),
       actionPanel: useActionPanel(),
+      notify: useNotify(),
       message: 'Loading...',
     }
   },
@@ -57,9 +59,14 @@ export default {
     },
     DeleteData() {
       console.log(this.emergency.selected)
-      database.DeleteData('Emergency', this.emergency.selected).then((e) => {
-        this.loadEmergency()
-      })
+      database
+        .DeleteData('Emergency', this.emergency.selected)
+        .then((e) => {
+          this.loadEmergency()
+        })
+        .finally(() => {
+          this.notify.Open('Запис видалено.', 'success')
+        })
     },
   },
   beforeMount() {

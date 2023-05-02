@@ -56,9 +56,7 @@ namespace EmergencySituations.Controllers
                 var loss = new Losses
                 {
                     AffectedPerson = current.Select(i => i.Losses.AffectedPerson).Sum(),
-                    DeadPerson = current.Select(i => i.Losses.DeadPerson).Sum(),
                     AffectedAnimals = current.Select(i => i.Losses.AffectedAnimals).Sum(),
-                    DeadAnimals = current.Select(i => i.Losses.DeadAnimals).Sum(),
 
                     DamagedBuildings = current.Select(i => i.Losses.DamagedBuildings).Sum(),
                     DestroyedBuildings = current.Select(i => i.Losses.DestroyedBuildings).Sum(),

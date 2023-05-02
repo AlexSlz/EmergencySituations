@@ -13,9 +13,11 @@ import { useAuthStore } from '@/stores/auth'
 import { useActionPanel } from '@/stores/actionPanel'
 import database from '@/main/database'
 import Admin from './components/AdminMenu/Admin.vue'
+import Notification from './components/Notification.vue'
 </script>
 
 <template>
+  <Notification />
   <MapView class="h-screen z-0 w-full sm:w-[70vw]" ref="Map" />
   <MyPanel>
     <Tab @onTabClick="emergency.select(null)" name="Події" :selected="true">
@@ -45,13 +47,9 @@ export default {
       actionPanel: useActionPanel(),
     }
   },
-  methods: {
-    Logout() {
-      this.authStore.logout()
-    },
-  },
   beforeMount() {
     database.CheckUser()
   },
+  components: { Notification },
 }
 </script>

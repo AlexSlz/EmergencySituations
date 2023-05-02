@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { useNotify } from './Notify'
 
 export const useAuthStore = defineStore('auth', () => {
+    let Notify = useNotify()
     const isAuth = ref(false)
     const userData = ref({})
 
@@ -22,6 +24,7 @@ export const useAuthStore = defineStore('auth', () => {
         userData.value = {}
         localStorage.removeItem('user')
         isAuth.value = false
+        Notify.Open('Ви вийшли з облікового запису.', 'success')
     }
 
 

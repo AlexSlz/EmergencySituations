@@ -5,9 +5,7 @@
         public int Id { get; set; }
 
         public int AffectedPerson { get; set; }
-        public int DeadPerson { get; set; }
         public int AffectedAnimals { get; set; }
-        public int DeadAnimals { get; set; }
         public int DestroyedBuildings { get; set; }
         public int DamagedBuildings { get; set; }
         public int DestroyedPersonalItems { get; set; }
@@ -18,9 +16,7 @@
             CREATE TABLE IF NOT EXISTS ""Losses"" (
 	            ""Id""	INTEGER NOT NULL,
 	            ""AffectedPerson""	INTEGER,
-	            ""DeadPerson""	INTEGER,
 	            ""AffectedAnimals""	INTEGER,
-	            ""DeadAnimals""	INTEGER,
 	            ""DestroyedBuildings""	INTEGER,
 	            ""DamagedBuildings""	INTEGER,
 	            ""DestroyedPersonalItems""	INTEGER,
