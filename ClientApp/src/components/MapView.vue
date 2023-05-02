@@ -5,7 +5,8 @@
 <script>
 import { useEmergencyStore } from '@/stores/emergency'
 import { useActionPanel } from '@/stores/actionPanel'
-import color from '@/main/color'
+import { useNavPanel } from '@/stores/NavPanel'
+import label from '@/main/label'
 import L from 'leaflet'
 import geo from '@/main/geo'
 
@@ -23,6 +24,7 @@ export default {
       tempList: [],
       emergency: useEmergencyStore(),
       actionPanel: useActionPanel(),
+      nav: useNavPanel(),
     }
   },
   mounted() {
@@ -50,7 +52,7 @@ export default {
   methods: {
     LookAtElement(element) {
       this.markerList.forEach((m) => {
-        L.DomUtil.removeClass(m._icon, 'gps_ring')
+        L.DomUtil.removeClass(m._icon, 'selectedElement')
       })
       if (element == null || element.positions === undefined || element.positions.length == 0) return
 
@@ -58,12 +60,13 @@ export default {
       this.markerList.forEach((m) => {
         element.positions.forEach((i) => {
           if (m._latlng.lat == i.x && m._latlng.lng == i.y) {
-            L.DomUtil.addClass(m._icon, 'gps_ring')
+            L.DomUtil.addClass(m._icon, 'selectedElement')
             Points.push([i.x, i.y])
           }
         })
       })
 
+      this.nav.Select(1)
       this.map.flyToBounds(new L.LatLngBounds(Points), { maxZoom: this.map.getZoom() })
     },
 
@@ -79,10 +82,10 @@ export default {
       this.deleteMarkers(this.markerList)
       elements.forEach((element) => {
         element.positions.forEach((i) => {
+          var c = label[this.emergency.colorBy]
+          c = c.element[element[c.type].name]
           var icon = L.divIcon({
-            html: `<span style="background-color: ${
-              color[this.emergency.colorBy][element[this.emergency.colorBy]]
-            }" class="circle"></span>`,
+            html: `<span style="background-color: black" class="circle"> <i class="myIcon fas ${c}"></i></span>`,
             className: '',
             iconSize: [30, 30],
           })
@@ -105,7 +108,12 @@ export default {
           element.x = pos.lat
           element.y = pos.lng
         }
-        var temp = L.marker([element.x, element.y], { draggable: true, autoPan: true })
+        var icon = L.divIcon({
+          html: `<span style="background-color: green; z-index: 9999" class="circle"></span>`,
+          className: '',
+          iconSize: [30, 30],
+        })
+        var temp = L.marker([element.x, element.y], { draggable: true, autoPan: true, icon: icon })
           .addTo(this.map)
           .on('dragend', function (e) {
             var position = e.target.getLatLng()

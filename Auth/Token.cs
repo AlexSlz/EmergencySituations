@@ -1,4 +1,5 @@
-﻿using EmergencySituations.Other.Model;
+﻿using EmergencySituations.DataBase.Model;
+using EmergencySituations.Other.Model;
 
 namespace EmergencySituations.Auth
 {
@@ -6,12 +7,12 @@ namespace EmergencySituations.Auth
     {
         private static List<TokenData> ActiveTokens = new List<TokenData>();
 
-        public static string GenerateToken(string name)
+        public static TokenData GenerateToken(string user)
         {
             var time = DateTime.Now.AddDays(1);
-            var token = new TokenData(name, time);
+            var token = new TokenData(user, time);
             ActiveTokens.Add(token);
-            return token.Key.ToString();
+            return token;
         }
 
         public static bool Validation(string key)

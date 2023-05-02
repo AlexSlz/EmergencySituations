@@ -16,7 +16,7 @@ namespace EmergencySituations.Controllers
 
         [HttpPost("{table}/{id}")]
         [AuthFilter]
-        public ActionResult<string> Post([FromForm] IFormFile file, string table, string id)
+        public ActionResult<string> UploadFile([FromForm] IFormFile file, string table, string id)
         {
             if (file == null)
                 return BadRequest("Need File.");
@@ -37,7 +37,7 @@ namespace EmergencySituations.Controllers
         }
 
         [HttpGet("{table}/{id}")]
-        public ActionResult<string> Get(string table, string id)
+        public ActionResult<string> GetFile(string table, string id)
         {
             string path = Path.Combine(_environment.WebRootPath, "uploads", table);
             if (!Directory.Exists(path))

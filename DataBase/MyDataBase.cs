@@ -17,9 +17,10 @@ namespace EmergencySituations.DataBase
             sqlConfig = databasePath + ";foreign keys=true";
             ExecuteNonQuery(Users.Sql);
             if (Count<Users>() <= 0)
+            {
                 Insert(new Users() { Name = "Alex", Login = "Admin", Password = "123" });
-
-            Console.WriteLine(Token.GenerateToken("Alex"));
+            }
+            Console.WriteLine(Token.GenerateToken("Alex").Key);
 
             ExecuteNonQuery(EmergencyLevel.Sql);
             if (Count<EmergencyLevel>() <= 0)

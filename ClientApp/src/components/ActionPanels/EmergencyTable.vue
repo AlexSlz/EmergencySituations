@@ -5,10 +5,10 @@
   <textarea v-model="element.description"></textarea>
   <h1>Дата і час</h1>
   <input v-model="element.dateAndTime" type="datetime-local" />
-  <!-- <h1>Рівень надзвичайної ситуації</h1>
-  <my-combo v-model="element.level" tableName="EmergencyLevel" />
+  <h1>Рівень надзвичайної ситуації</h1>
+  <my-combo v-model="element.level.id" tableName="EmergencyLevel" />
   <h1>Тип надзвичайної ситуації</h1>
-  <my-combo v-model="element.type" tableName="EmergencyType" /> -->
+  <my-combo v-model="element.type.id" tableName="EmergencyType" />
   <h1>Зображення</h1>
   <file-input v-model="element.image" tableName="Emergency" />
 

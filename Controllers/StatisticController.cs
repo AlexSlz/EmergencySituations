@@ -1,6 +1,6 @@
 ﻿using EmergencySituations.DataBase;
 using EmergencySituations.DataBase.Model;
-using EmergencySituations.Other;
+using EmergencySituations.Other.Model;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 
@@ -13,14 +13,20 @@ namespace EmergencySituations.Controllers
         [HttpGet]
         public ActionResult<string> Get(int year = 0)
         {
-            var temp = GetData(year);
+            var temp = CalculateData(year);
             if (temp == null)
                 return NotFound();
             return Ok(temp);
         }
-        
 
-        public static IEnumerable<StatisticData> GetData(int year = 0)
+        [HttpGet("year")]
+        public ActionResult<string> GetYear()
+        {
+            var years = MyDataBase.Select<Emergency>().Select(i => i.DateAndTime.Year).Distinct();
+            return Ok(years);
+        }
+
+        public static IEnumerable<StatisticData> CalculateData(int year = 0)
         {
             var data = MyDataBase.Select<Emergency>();
             var levels = MyDataBase.Select<EmergencyLevel>().Select(i => i.Name);
@@ -47,7 +53,21 @@ namespace EmergencySituations.Controllers
 
                 result.Level = getCount(current, levels);
                 result.Type = getCount(current, types);
-                result.Costs = current.Select(i => i.Losses.Costs).Sum();
+                var loss = new Losses
+                {
+                    AffectedPerson = current.Select(i => i.Losses.AffectedPerson).Sum(),
+                    DeadPerson = current.Select(i => i.Losses.DeadPerson).Sum(),
+                    AffectedAnimals = current.Select(i => i.Losses.AffectedAnimals).Sum(),
+                    DeadAnimals = current.Select(i => i.Losses.DeadAnimals).Sum(),
+
+                    DamagedBuildings = current.Select(i => i.Losses.DamagedBuildings).Sum(),
+                    DestroyedBuildings = current.Select(i => i.Losses.DestroyedBuildings).Sum(),
+                    DamagedPersonalItems = current.Select(i => i.Losses.DamagedPersonalItems).Sum(),
+                    DestroyedPersonalItems = current.Select(i => i.Losses.DestroyedPersonalItems).Sum(),
+
+                    Costs = current.Select(i => i.Losses.Costs).Sum()
+                };
+                result.Losses = loss;
 
                 
                 return result;

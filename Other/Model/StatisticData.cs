@@ -1,4 +1,6 @@
-﻿namespace EmergencySituations.Other
+﻿using EmergencySituations.DataBase.Model;
+
+namespace EmergencySituations.Other.Model
 {
     public class StatisticData
     {
@@ -6,7 +8,7 @@
         public int TotalCount { get; set; }
         public Dictionary<string, int> Level { get; set; }
         public Dictionary<string, int> Type { get; set; }
-        public int Costs { get; set; }
+        public Losses Losses { get; set; }
     }
 
     public static class Ex
@@ -20,7 +22,7 @@
              {
                  b[0, i] = data.Key;
                  b[1, i++] = data.Value.ToString();
-            });
+             });
             return b;
         }
     }

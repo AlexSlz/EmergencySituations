@@ -4,7 +4,7 @@ import { ref, watch } from 'vue'
 export const useEmergencyStore = defineStore('emergency', () => {
     const list = ref([])
     const selected = ref(null)
-    const colorBy = ref('type')
+    const colorBy = ref(0)
     const tempPoints = ref([])
     const reLoad = ref({})
 

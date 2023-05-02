@@ -12,6 +12,7 @@ import { useEmergencyStore } from '@/stores/emergency'
 import { useAuthStore } from '@/stores/auth'
 import { useActionPanel } from '@/stores/actionPanel'
 import database from '@/main/database'
+import Admin from './components/AdminMenu/Admin.vue'
 </script>
 
 <template>
@@ -26,6 +27,7 @@ import database from '@/main/database'
       <Tab v-if="!authStore.isAuth" name="Login"><Login /></Tab>
     </template>
     <template v-else>
+      <Tab name="Admin" fullPage="true"><Admin /></Tab>
       <Tab name="Logout"><input @click="authStore.logout()" type="submit" /></Tab>
       <Tab v-if="actionPanel.show" :name="actionPanel.name" openByDefault="true">
         <ActionPanel />

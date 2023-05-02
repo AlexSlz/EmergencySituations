@@ -2,7 +2,10 @@ import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 
 async function GetData(tableName) {
-    var data = await axios(`api/${tableName}`).then((res) => {
+    let authStore = useAuthStore()
+    var data = await axios(`api/${tableName}`, {
+        headers: { 'token': authStore.userData.token }
+    }).then((res) => {
         return res.data
     }).catch((err) => {
         throw new Error(err.response.data || 'Server Error')
@@ -122,10 +125,25 @@ async function GetStatistic(year) {
     })
 }
 
+async function GetYears() {
+    return await axios('api/statistic/year').then((res) => {
+        return res.data
+    }).catch((err) => {
+        throw new Error(err.response.data || 'Server Error')
+    })
+}
+
+async function GetTableNameList() {
+    let authStore = useAuthStore()
+    const res = await axios(`api/tables`, {
+        headers: { 'token': authStore.userData.token }
+    })
+    return await res.data
+}
 
 export default {
     GetData, AddToTable, EditTable, DeleteData, GetToken, GetUserByToken, CheckUser, UploadFile, DeleteFiles,
-    GetStatistic
+    GetStatistic, GetYears, GetTableNameList
 }
 
 

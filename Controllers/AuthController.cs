@@ -17,10 +17,10 @@ namespace EmergencySituations.Controllers
 
             if (user == null)
                 return BadRequest("User Not Found");
-            return Token.GenerateToken(user.Login);
+            return Ok(Token.GenerateToken(user.Login).Key);
         }
         [HttpGet("{token}")]
-        public ActionResult<string> getTokenOwner(string token)
+        public ActionResult<string> GetTokenOwner(string token)
         {
             var user = MyDataBase.Select<Users>().FirstOrDefault(u => u.Login == Token.GetOwner(token));
             if (user == null)
@@ -30,7 +30,7 @@ namespace EmergencySituations.Controllers
         }
 
         [HttpGet("{token}/check")]
-        public ActionResult<string> checkToken(string token)
+        public ActionResult<string> CheckToken(string token)
         {
             return Ok(Token.Validation(token));
         }

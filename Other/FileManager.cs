@@ -4,6 +4,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using EmergencySituations.Controllers;
 using EmergencySituations.DataBase;
 using EmergencySituations.DataBase.Model;
+using EmergencySituations.Other.Model;
 
 namespace EmergencySituations.Other
 {
@@ -16,14 +17,14 @@ namespace EmergencySituations.Other
                 var emergency = MyDataBase.Select<Emergency>().Where(i => i.DateAndTime.Year == year);
                 if (emergency.Count() <= 0)
                     return false;
-                var statistic = StatisticController.GetData(0).Where(y => y.Date == year).First();
+                var statistic = StatisticController.CalculateData(0).Where(y => y.Date == year).First();
                 var text = $"{year} рік";
                 if(month > 0)
                 {
                     emergency = emergency.Where(i => i.DateAndTime.Month == month);
                     if (emergency.Count() <= 0)
                         return false;
-                    statistic = StatisticController.GetData(year).Where(m => m.Date == month).First();
+                    statistic = StatisticController.CalculateData(year).Where(m => m.Date == month).First();
                     text = $"{new DateTime(2002, month, 28).ToString("MMMM")} {year}";
                 }
                 MainDocumentPart mainPart = doc.AddMainDocumentPart();
@@ -35,7 +36,7 @@ namespace EmergencySituations.Other
                 AddText(doc, CreateText($"Звіт за {text}", 16, true));
                 AddText(doc, CreateText(""));
                 AddText(doc, CreateText($"- Усього подій: {statistic.TotalCount}", 16));
-                AddText(doc, CreateText($"- Збитки: {statistic.Costs}", 16));
+                AddText(doc, CreateText($"- Збитки: {statistic.Losses.Costs}", 16));
 
                 AddText(doc, CreateText("Кількість подій за рівнем:"));
                 InsertWordTable(doc, statistic.Level.ToTable());

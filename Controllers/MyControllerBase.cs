@@ -37,7 +37,7 @@ namespace EmergencySituations.Controllers
 
         [HttpDelete("{id}")]
         [AuthFilter]
-        public ActionResult<string> DeleteDataFromTableByKey(int id)
+        public ActionResult<string> DeleteData(int id)
         {
             return Ok(MyDataBase.Delete<T>(id).Message);
         }

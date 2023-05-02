@@ -11,15 +11,18 @@
   </div>
 </template>
 <script>
+import { useNavPanel } from '@/stores/NavPanel'
 export default {
   data() {
     return {
       tabs: [],
       fold: false,
+      nav: useNavPanel(),
     }
   },
   created() {
     this.tabs.push({ name: 'Map', fold: '', onlyMobile: true })
+    this.nav.Select = this.selectTabById
   },
   methods: {
     selectTab(selectedTab) {
@@ -28,6 +31,9 @@ export default {
       this.tabs.forEach((tab) => {
         tab.isActive = tab.name == selectedTab.name
       })
+    },
+    selectTabById(id) {
+      if (!this.tabs[id].isActive) this.selectTab(this.tabs[id])
     },
   },
 }

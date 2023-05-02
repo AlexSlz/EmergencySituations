@@ -1,6 +1,6 @@
 <template>
   <select :value="modelValue" @change="changeCombo">
-    <option class="text-mySecond" :value="item" v-for="item in itemsVisual">{{ item }}</option>
+    <option class="text-mySecond" :value="index + 1" v-for="(item, index) in itemsVisual">{{ item }}</option>
   </select>
 </template>
 <script>
@@ -29,14 +29,8 @@ export default {
       this.$emit('onChange', e.target.value)
       this.$emit('update:modelValue', e.target.value)
     },
-    checkValue() {
-      console.log(this.modelValue)
-      if (typeof this.modelValue != 'number') {
-        this.$emit('update:modelValue', this.itemsVisual.indexOf(this.modelValue) + 1)
-      }
-    },
   },
-  emits: ['onChange'],
+  emits: ['onChange', 'update:modelValue'],
   watch: {
     tableName: {
       immediate: true,
@@ -44,7 +38,7 @@ export default {
         if (val != undefined) {
           database.GetData(this.tableName).then((i) => {
             this.itemsVisual = i.map((a) => a.name)
-            if (this.modelValue === undefined) this.$emit('update:modelValue', this.itemsVisual[0])
+            if (this.modelValue === undefined) this.$emit('update:modelValue', 1)
           })
         }
       },

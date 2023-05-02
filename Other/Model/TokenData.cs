@@ -1,4 +1,5 @@
-﻿namespace EmergencySituations.Other.Model
+﻿using EmergencySituations.DataBase.Model;
+namespace EmergencySituations.Other.Model
 {
     public class TokenData
     {

@@ -1,36 +1,68 @@
 <template>
   <div class="p-2">
-    <my-combo class="w-56 m-3" v-model="tableId" :items="tableNameList" />
-    <MyTable :tableName="tableNameList[tableId - 1]" />
-    <button
-      @click="
-        editmenu.open({ table: tableNameList[tableId - 1], fullPage: tableNameList[tableId - 1] != 'Надзвичайні ситуації' })
-      "
-    >
-      Додати поле до таблиці {{ tableNameList[tableId - 1] }}
-    </button>
+    <my-combo v-model="tableId" :items="tableNameList" @onChange="LoadTable"></my-combo>
+    <myTable :headers="table[0]" :body="table[1]" :link="link" @onLink="test" />
   </div>
 </template>
 <script>
-import { useEmergencyStore } from '@/stores/emergency'
-import { useMenuStore } from '@/stores/editMenu'
-import MyTable from '../UI/MyTable.vue'
 import database from '@/main/database.js'
 export default {
   data() {
     return {
-      emergencyStore: useEmergencyStore(),
-      editmenu: useMenuStore(),
       tableId: 1,
       tableNameList: [],
+      table: [[], []],
+      link: [],
     }
   },
-  mounted() {
-    database.getTableNameList().then((res) => {
-      this.tableNameList = res
-    })
+  methods: {
+    test(id) {
+      this.tableNameList.forEach((i) => {
+        if (i.toLowerCase().includes(id.toLowerCase())) {
+          this.LoadTable(this.tableNameList.indexOf(i) + 1)
+          return
+        }
+      })
+    },
+    LoadTable(id) {
+      this.tableId = id
+      database.GetData(this.tableNameList[id - 1]).then((res) => {
+        this.table[0] = Object.keys(res[0])
+        this.table[1] = Object.values(res)
+        this.table[1].forEach((i, index) => {
+          Object.keys(i).forEach((j) => {
+            if (typeof i[j] == 'object') {
+              if ('name' in i[j]) {
+                i[j] = i[j].name
+                this.link.push({ name: j })
+                return
+              }
+              if ('id' in i[j]) {
+                i[j] = i[j].id
+                this.link.push({ name: j })
+                return
+              }
+            }
+            if (Array.isArray(i[j])) {
+              i[j] = i[j].map((p) => p.location).join(', ')
+              this.link.push({ name: j })
+              return
+            }
+          })
+        })
+      })
+    },
   },
-  components: { MyTable },
+  mounted() {
+    database
+      .GetTableNameList()
+      .then((res) => {
+        this.tableNameList = res
+      })
+      .finally(() => {
+        this.LoadTable(this.tableId)
+      })
+  },
 }
 </script>
 <style></style>

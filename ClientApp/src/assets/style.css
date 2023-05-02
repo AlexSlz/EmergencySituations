@@ -19,11 +19,19 @@ body::-webkit-scrollbar {
   @apply border-blue-300;
 }
 
-.gps_ring span {
+.selectedElement span {
   @apply rounded-full border-[4px] border-yellow-300;
 }
+.selectedElement i {
+  @apply text-sm transition-all;
+}
+
+.myIcon {
+  @apply text-white text-xl transition-all;
+}
+
 .circle {
-  @apply rounded-full table-cell w-[30px] h-[30px] z-20 opacity-90 transition-all shadow-lg;
+  @apply rounded-full flex w-[30px] h-[30px] z-20 opacity-90 transition-all shadow-lg items-center justify-center;
 }
 
 input,
