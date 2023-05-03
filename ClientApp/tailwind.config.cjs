@@ -8,16 +8,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'myMain': '#f5f3ff',
-        'myActive': '#0ea5e9',
+        'myMain': '#262626',
+        'mySecond': '#404040',
+
+
+        'myElement': '#363f7e',
+        'myActive': '#788DF9',
+        'mySecondActive': '#0a0a0a',
         'myRed': '#f43f5e',
+
 
         'myText': '#fafafa',
         'mySecondText': '#a3a3a3',
 
-        'myBG': '#262626',
-        'mySecond': '#404040',
-        'mySecondActive': '#525252'
       }
     },
   },

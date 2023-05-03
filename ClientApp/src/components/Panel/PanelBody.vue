@@ -40,19 +40,19 @@ export default {
 </script>
 <style scoped>
 .panel {
-  @apply absolute z-20 right-0 top-0 h-full overflow-y-auto bg-myBG min-w-[100%] sm:min-w-[30vw] sm:max-w-sm;
+  @apply absolute z-20 right-0 top-0 h-full overflow-y-auto bg-myMain min-w-[100%] sm:min-w-[30vw] sm:max-w-sm;
 }
 .fold {
   @apply h-auto;
 }
 .tabs {
-  @apply overflow-hidden bg-mySecond flex flex-wrap justify-center m-2;
+  @apply overflow-hidden bg-mySecond flex flex-wrap justify-center m-2 text-myText;
 }
 .tabs li {
   @apply text-center p-2 text-base; /*float-left list-item*/
 }
 .active {
-  @apply border-myMain border-b-2;
+  @apply border-myActive border-b-2;
 }
 .mobile {
   @apply block sm:hidden;

@@ -2,43 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-}
-
 body {
-  @apply text-lg text-myText m-0 p-0;
+  @apply text-lg text-myText bg-myMain m-0 p-0;
 }
 
 body::-webkit-scrollbar {
   display: none;
 }
 
-.input:disabled {
-  @apply border-blue-300;
-}
-
 .selectedElement span {
-  @apply rounded-full border-[4px] border-yellow-300;
+  @apply rounded-full border-[4px] border-myActive;
 }
 .selectedElement i {
   @apply text-sm transition-all;
 }
 
 .myIcon {
-  @apply text-white text-xl transition-all;
+  @apply text-myText text-xl transition-all;
 }
 
 .circle {
   @apply rounded-full flex w-[30px] h-[30px] z-20 opacity-90 transition-all shadow-lg items-center justify-center;
 }
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  @apply opacity-50 cursor-not-allowed transition;
+}
 
 input,
 select,
 textarea {
-  @apply hover:border-b-myActive font-semibold border-b-myMain border-b-2 duration-75 w-full bg-transparent p-2;
+  @apply hover:border-b-myActive font-semibold border-b-myText border-b-2 duration-75 w-full bg-transparent p-2;
+}
+option {
+  @apply text-myMain;
 }
 button {
-  @apply px-4 py-2 m-2 font-semibold bg-mySecond hover:bg-myActive rounded-md shadow-sm ease-in-out duration-700;
+  @apply px-4 py-2 m-2 font-semibold bg-myElement text-myText hover:bg-myActive rounded-md shadow-sm ease-in-out duration-700;
 }
+
+/* 
+
+
+                    display: inline-block;
+                    outline: 0;
+                    border: none;
+                    cursor: pointer;
+                    font-weight: 600;
+                    border-radius: 4px;
+                    font-size: 13px;
+                    height: 30px;
+                    background-color: #9147ff;
+                    color: white;
+                    padding: 0 20px;
+                    :hover {
+                        background-color: #772ce8;
+                    }
+                
+                 */

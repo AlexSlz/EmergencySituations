@@ -2,7 +2,7 @@
   <template v-if="items.length > 0">
     <div class="fixed select-none block m-auto bottom-4 sm:top-4 z-[40] w-64">
       <div
-        class="bg-myBG hover:bg-neutral-900 border-2 border-neutral-900 transition flex items-center p-4 my-2 space-x-2"
+        class="bg-myMain hover:bg-mySecondActive transition flex items-center p-4 my-2 space-x-2"
         :class="item.type"
         :style="`opacity:${item.time}`"
         @click="closeNotify(item)"
@@ -44,9 +44,9 @@ export default {
 
 <style>
 .success {
-  @apply border-l-4 border-l-emerald-600;
+  @apply border-l-4 border-l-myActive;
 }
 .error {
-  @apply border-l-4 border-l-rose-500;
+  @apply border-l-4 border-l-myRed;
 }
 </style>

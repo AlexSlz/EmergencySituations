@@ -31,24 +31,20 @@ namespace EmergencySituations.Controllers
             var data = MyDataBase.Select<Emergency>();
             var levels = MyDataBase.Select<EmergencyLevel>().Select(i => i.Name);
             var types = MyDataBase.Select<EmergencyType>().Select(i => i.Name);
-            var yearGroup = data.GroupBy(i => i.DateAndTime.Year);
-           
-            return yearGroup.Select(i =>
-            {
-                var date = i.Select(a => a.DateAndTime.Year).First();
-                var current = data.Where(i => i.DateAndTime.Year == date);
+            var group = data.GroupBy(i => i.DateAndTime.Year);
 
-                if(year > 0)
-                {
-                    date = i.Select(a => a.DateAndTime.Month).First();
-                    current = data.Where(i => i.DateAndTime.Year == year && i.DateAndTime.Month == date);
-                    if (current.Count() == 0)
-                        return null;
-                }
+            if(year > 0)
+            {
+                group = data.Where(i => i.DateAndTime.Year == year).GroupBy(i => i.DateAndTime.Month);
+            }
+
+            return group.Select(d =>
+            {
+                var current = d.ToList();
 
                 var result = new StatisticData() { 
-                    Date = int.Parse(date.ToString()), 
-                    TotalCount = i.Count()  
+                    Date = d.Key, 
+                    TotalCount = current.Count()  
                 };
 
                 result.Level = getCount(current, levels);

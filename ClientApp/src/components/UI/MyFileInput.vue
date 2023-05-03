@@ -33,7 +33,7 @@ export default {
     },
     onButtonClick() {
       var myInput = this.$refs.input
-      if (myInput.files.length >= 1 || this.modelValue != '') {
+      if (myInput.files.length >= 1 || (this.modelValue != '' && this.modelValue != undefined)) {
         myInput.type = 'text'
         myInput.type = 'file'
         this.$emit('update:modelValue', '')

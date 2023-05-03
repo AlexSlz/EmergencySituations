@@ -13,7 +13,7 @@
   <file-input v-model="element.image" tableName="Emergency" />
 
   <h1>Втрати</h1>
-  <div class="px-5 overflow-auto max-h-64">
+  <div class="px-5 py-2">
     <LossesTable :element="element.losses" />
   </div>
   <h1>Позиції</h1>

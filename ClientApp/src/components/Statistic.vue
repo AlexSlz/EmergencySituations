@@ -7,9 +7,9 @@
   </select>
   <template v-if="isLoaded">
     <myTable :headers="table1[0]" :body="table1[1]" />
-    <h1 class="p-3">Кількість подій за рівнем:</h1>
+    <h1 class="p-3 font-bold">Кількість подій за рівнем:</h1>
     <myTable :headers="table2[0]" :body="table2[1]" />
-    <h1 class="p-3">Кількість подій за типом:</h1>
+    <h1 class="p-3 font-bold">Кількість подій за типом:</h1>
     <myTable :headers="table3[0]" :body="table3[1]" />
   </template>
   <template v-else>Loading...</template>
