@@ -5,9 +5,14 @@ import { useEmergencyStore } from '@/stores/emergency'
 import { useActionPanel } from '@/stores/actionPanel'
 import { useNotify } from '../../stores/Notify'
 import database from '@/main/database'
+import Filter from './Filter.vue'
+import info from '@/main/infoManager'
 </script>
 
 <template>
+  <my-modal ref="modal" :show="showModal">
+    <Filter :params="filterParam" />
+  </my-modal>
   <div class="block">
     <div v-if="emergency.selected != null">
       <input @click="emergency.select(null)" value="Назад" type="button" />
@@ -19,7 +24,10 @@ import database from '@/main/database'
     </div>
     <template v-else>
       <button v-if="isAuth" @click="actionPanel.open()">Add New</button>
-      <ItemList @click="emergency.select(item)" :data="item" v-for="(item, i) in emergency.list" />
+      <h1>Пошук</h1>
+      <input v-model="filterParam.name" />
+      <button @click="this.$refs.modal.Open()">Filter</button>
+      <ItemList @click="emergency.select(item)" :data="item" v-for="(item, i) in filteredEmergency" />
       <h1 v-if="emergency.list.length == 0" class="text-center pt-3">{{ message }}</h1>
     </template>
   </div>
@@ -35,11 +43,32 @@ export default {
   },
   data() {
     return {
+      filterParam: { name: '', description: '', level: 0, type: 0, sort: 'id', orderBy: false },
+      showModal: false,
       emergency: useEmergencyStore(),
       actionPanel: useActionPanel(),
       notify: useNotify(),
       message: 'Loading...',
     }
+  },
+  computed: {
+    filteredEmergency() {
+      var filtered = this.emergency.list.filter((item) => {
+        var name = item.name.toLowerCase().includes(this.filterParam.name.toLowerCase())
+        var description = item.description.toLowerCase().includes(this.filterParam.description.toLowerCase())
+        var level = true
+        if (this.filterParam.level > 0) level = item.level.id == this.filterParam.level
+        var type = true
+        if (this.filterParam.type > 0) type = item.type.id == this.filterParam.type
+        return name && description && level && type
+      })
+      var sorted = filtered.sort((a, b) => {
+        if (!Number.isInteger(a[this.filterParam.sort])) return a[this.filterParam.sort].localeCompare(b[this.filterParam.sort])
+        return a[this.filterParam.sort] - b[this.filterParam.sort]
+      })
+      if (this.filterParam.orderBy) return sorted.reverse()
+      return sorted
+    },
   },
   methods: {
     async loadEmergency() {
@@ -73,6 +102,7 @@ export default {
     this.emergency.reLoad = this.loadEmergency
     this.loadEmergency()
   },
+  components: { Filter },
 }
 </script>
 

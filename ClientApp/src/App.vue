@@ -7,13 +7,13 @@ import Tab from '@/components/Panel/PanelTab.vue'
 import Login from '@/components/Login.vue'
 import ActionPanel from '@/components/ActionPanels/ActionPanel.vue'
 import Statistic from '@/components/Statistic.vue'
+import Admin from './components/AdminMenu/Admin.vue'
+import Notification from './components/Notification.vue'
 
+import database from '@/main/database'
 import { useEmergencyStore } from '@/stores/emergency'
 import { useAuthStore } from '@/stores/auth'
 import { useActionPanel } from '@/stores/actionPanel'
-import database from '@/main/database'
-import Admin from './components/AdminMenu/Admin.vue'
-import Notification from './components/Notification.vue'
 </script>
 
 <template>
@@ -50,6 +50,5 @@ export default {
   beforeMount() {
     database.CheckUser()
   },
-  components: { Notification },
 }
 </script>

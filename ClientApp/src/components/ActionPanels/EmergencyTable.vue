@@ -20,6 +20,7 @@
   <pos-list :items="element.positions" />
 </template>
 <script>
+import info from '@/main/infoManager'
 import LossesTable from './LossesTable.vue'
 
 export default {
@@ -30,11 +31,11 @@ export default {
     },
   },
   beforeMount() {
-    if (this.element.dateAndTime == undefined) this.element.dateAndTime = new Date().toJSON().slice(0, 19)
+    if (this.element.dateAndTime == undefined) this.element.dateAndTime = info.GetTime().replace(' ', 'T')
     if (this.element.positions == undefined) this.element.positions = []
     if (this.element.losses == undefined) this.element.losses = {}
-    this.element.type = { Id: 1 }
-    this.element.level = { Id: 1 }
+    this.element.type = { id: 1 }
+    this.element.level = { id: 1 }
   },
   components: { LossesTable },
 }
