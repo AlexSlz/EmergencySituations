@@ -29,6 +29,9 @@ export default {
   },
   methods: {
     addNotify(message, type) {
+      if (this.items.find((i) => i.message == `${message}`)) {
+        return
+      }
       let notify = { message, type, time: 1, pause: false }
       this.items.push(notify)
     },

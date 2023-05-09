@@ -1,4 +1,5 @@
 ﻿using EmergencySituations.DataBase;
+using EmergencySituations.DataBase.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmergencySituations.Controllers
@@ -12,5 +13,33 @@ namespace EmergencySituations.Controllers
         {
             return Ok(MyDataBase.GetTableNameList());
         }
+
+        [HttpGet("test")]
+        public ActionResult<string> Test(int c = 100)
+        {
+            Random r = new Random();
+            for (int i = 0; i < c; i++)
+            {
+                DateTime date = new DateTime(2018, 1, 1);
+                int range = (DateTime.Today - date).Days;
+                date = date.AddDays(r.Next(range));
+                var temp = new Emergency()
+                {
+                    Name = $"Test#{i}",
+                    DateAndTime = date,
+                    Level = new EmergencyLevel() { Id = r.Next(1, 5) },
+                    Type = new EmergencyType() { Id = r.Next(1, 5) },
+                    Losses = new Losses() { Costs = r.Next(1000, 50000) },
+                };
+                MyDataBase.Insert(temp);
+
+                var t = new Positions() { EmergencyId = MyDataBase.GetLastId("Emergency"), X = r.Next(30, 60), Y = r.Next(0, 50) };
+                MyDataBase.Insert(t);
+            }
+
+
+            return Ok();
+        }
+
     }
 }

@@ -3,32 +3,31 @@ import ItemInfo from './ItemInfo.vue'
 import ItemList from './ItemList.vue'
 import { useEmergencyStore } from '@/stores/emergency'
 import { useActionPanel } from '@/stores/actionPanel'
-import { useNotify } from '../../stores/Notify'
+import { useNotify } from '@/stores/Notify'
 import database from '@/main/database'
-import Filter from './Filter.vue'
-import info from '@/main/infoManager'
 </script>
 
 <template>
-  <my-modal ref="modal" :show="showModal">
-    <Filter :params="filterParam" />
-  </my-modal>
   <div class="block">
     <div v-if="emergency.selected != null">
       <input @click="emergency.select(null)" value="Назад" type="button" />
       <ItemInfo :element="emergency.selected" />
-      <template v-if="isAuth">
+      <template v-if="isAuth && !loading">
         <button @click="actionPanel.open({ selected: emergency.selected, tableName: 'Emergency' })">Edit</button>
         <button class="bg-myRed" @click="DeleteData">Delete</button>
       </template>
     </div>
     <template v-else>
-      <button v-if="isAuth" @click="actionPanel.open()">Add New</button>
-      <h1>Пошук</h1>
-      <input v-model="filterParam.name" />
-      <button @click="this.$refs.modal.Open()">Filter</button>
-      <ItemList @click="emergency.select(item)" :data="item" v-for="(item, i) in filteredEmergency" />
-      <h1 v-if="emergency.list.length == 0" class="text-center pt-3">{{ message }}</h1>
+      <button v-if="isAuth" @click="actionPanel.open()">Додати нову подію</button>
+      <ItemList @click="emergency.select(item)" :data="item" v-for="(item, i) in emergency.list" />
+      <h1 v-if="loading" class="text-center p-3">Завантаження...</h1>
+      <span class="flex">
+        <template v-if="!loading">
+          <input v-if="page != 1" @click="movePage(-page + 1)" value="<<-" type="button" />
+          <input v-if="page != 1" @click="movePage(-1)" value="<-" type="button" />
+          <input v-if="page < maxPage" @click="movePage(1)" :value="`${page}/${maxPage} ->`" type="button"
+        /></template>
+      </span>
     </template>
   </div>
 </template>
@@ -43,58 +42,49 @@ export default {
   },
   data() {
     return {
-      filterParam: { name: '', description: '', level: 0, type: 0, sort: 'id', orderBy: false },
       showModal: false,
       emergency: useEmergencyStore(),
       actionPanel: useActionPanel(),
       notify: useNotify(),
-      message: 'Loading...',
+
+      page: 1,
+      maxPage: 1,
+      limit: 50,
+      loading: false,
     }
   },
-  computed: {
-    filteredEmergency() {
-      var filtered = this.emergency.list.filter((item) => {
-        var name = item.name.toLowerCase().includes(this.filterParam.name.toLowerCase())
-        var description = item.description.toLowerCase().includes(this.filterParam.description.toLowerCase())
-        var level = true
-        if (this.filterParam.level > 0) level = item.level.id == this.filterParam.level
-        var type = true
-        if (this.filterParam.type > 0) type = item.type.id == this.filterParam.type
-        return name && description && level && type
-      })
-      var sorted = filtered.sort((a, b) => {
-        if (!Number.isInteger(a[this.filterParam.sort])) return a[this.filterParam.sort].localeCompare(b[this.filterParam.sort])
-        return a[this.filterParam.sort] - b[this.filterParam.sort]
-      })
-      if (this.filterParam.orderBy) return sorted.reverse()
-      return sorted
-    },
-  },
   methods: {
+    movePage(i) {
+      this.page += i
+      this.loadEmergency()
+    },
     async loadEmergency() {
+      this.emergency.list = []
+      this.loading = true
       await database
-        .GetData('Emergency')
+        .GetData('Emergency', this.limit, this.page, 'DateAndTime DESC')
         .then((res) => {
-          console.log(res)
-          this.emergency.list = res
-          this.message = 'Список порожній.'
+          this.emergency.list = res.data
+          this.maxPage = res.maxPage
         })
         .catch((e) => {
-          this.message = e
+          this.notify.Open(e, 'error')
         })
         .finally(() => {
           this.emergency.select(null)
+          this.loading = false
         })
     },
     DeleteData() {
-      console.log(this.emergency.selected)
+      this.loading = true
       database
         .DeleteData('Emergency', this.emergency.selected)
         .then((e) => {
-          this.loadEmergency()
+          this.loading = false
+          if (e != null) this.loadEmergency()
         })
-        .finally(() => {
-          this.notify.Open('Запис видалено.', 'success')
+        .catch((e) => {
+          this.notify.Open(e, 'error')
         })
     },
   },
@@ -102,7 +92,6 @@ export default {
     this.emergency.reLoad = this.loadEmergency
     this.loadEmergency()
   },
-  components: { Filter },
 }
 </script>
 

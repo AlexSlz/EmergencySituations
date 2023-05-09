@@ -9,11 +9,13 @@
     <h1>Сортувати</h1>
     <span class="flex">
       <select v-model="params.sort">
-        <option value="id">Без сортування</option>
-        <option value="name">За назвою</option>
         <option value="dateAndTime">За датою та часом</option>
+        <option value="name">За назвою</option>
       </select>
-      <input class="w-6" v-model="params.orderBy" type="checkbox" />
+      <select class="w-16" v-model="params.orderBy">
+        <option :value="true">↑</option>
+        <option :value="false">↓</option>
+      </select>
     </span>
   </div>
 </template>

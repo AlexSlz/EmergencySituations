@@ -22,7 +22,8 @@ namespace EmergencySituations.Controllers
         [HttpGet("year")]
         public ActionResult<string> GetYear()
         {
-            var years = MyDataBase.Select<Emergency>().Select(i => i.DateAndTime.Year).Distinct();
+            var years = MyDataBase.GetYearList();
+            years.Sort();
             return Ok(years);
         }
 
@@ -38,7 +39,7 @@ namespace EmergencySituations.Controllers
                 group = data.Where(i => i.DateAndTime.Year == year).GroupBy(i => i.DateAndTime.Month);
             }
 
-            return group.Select(d =>
+            var res = group.Select(d =>
             {
                 var current = d.ToList();
 
@@ -63,10 +64,11 @@ namespace EmergencySituations.Controllers
                 };
                 result.Losses = loss;
 
+
                 
                 return result;
             });
-
+            return res.ToList().OrderBy(i => i.Date);
         }
 
         private static Dictionary<string, int> getCount(IEnumerable<Emergency> current, IEnumerable<string> names)

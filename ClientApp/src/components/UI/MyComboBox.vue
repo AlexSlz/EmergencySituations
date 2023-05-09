@@ -1,5 +1,5 @@
 <template>
-  <select :value="modelValue" @change="changeCombo">
+  <select :value="modelValue" @change="changeCombo" :disabled="disabled">
     <option class="text-mySecond" :value="getIndex(index)" v-for="(item, index) in itemsVisual">{{ item }}</option>
   </select>
 </template>
@@ -8,6 +8,10 @@ import database from '@/main/database'
 export default {
   name: 'my-combo',
   props: {
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
     modelValue: {
       required: true,
     },
@@ -42,7 +46,7 @@ export default {
       handler(val) {
         if (val != undefined) {
           database.GetData(this.tableName).then((i) => {
-            this.itemsVisual = i.map((a) => a.name)
+            this.itemsVisual = i.data.map((a) => a.name)
             if (this.modelValue === undefined) this.$emit('update:modelValue', 1)
             if (this.firstElement) this.itemsVisual.unshift('')
           })

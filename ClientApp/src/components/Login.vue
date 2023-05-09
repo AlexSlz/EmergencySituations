@@ -1,8 +1,10 @@
 <template>
   <form @submit.prevent="auth()">
+    <h1 class="px-2">Логін</h1>
     <input type="text" placeholder="Login" v-model="login" />
+    <h1 class="px-2">Пароль</h1>
     <input type="password" placeholder="Password" v-model="pass" />
-    <input type="submit" />
+    <input type="submit" value="Підтвердити" />
   </form>
 </template>
 <script>

@@ -20,11 +20,8 @@ namespace EmergencySituations.Controllers.DBTables
             { 
                 return BadRequest(a.Message);
             }
-            var emergency = MyDataBase.Select<Emergency>();
 
-            if (emergency == null)
-                return BadRequest();
-            var maxId = emergency.Max(e => e.Id);
+            var maxId = MyDataBase.GetLastId(typeof(Emergency).Name);
             Position(positions, maxId, MyDataBase.Insert);
 
             return "Ok";
@@ -36,7 +33,7 @@ namespace EmergencySituations.Controllers.DBTables
         {
             if (data.Positions != null)
             {
-                var find = MyDataBase.Select<Emergency>().Find(i => i.Id == data.Id);
+                var find = MyDataBase.Select<Emergency>($"SELECT * FROM Emergency WHERE id = {data.Id}").First();
                 if (find != null)
                 {
                     var difference = find.Positions

@@ -26,11 +26,11 @@ import { useActionPanel } from '@/stores/actionPanel'
     <Tab fullPage="true" name="Статистика"><Statistic /></Tab>
     <Tab name="Позначення"><Notation /></Tab>
     <template v-if="!authStore.isAuth">
-      <Tab v-if="!authStore.isAuth" name="Login"><Login /></Tab>
+      <Tab v-if="!authStore.isAuth" name="Авторизація"><Login /></Tab>
     </template>
     <template v-else>
-      <Tab name="Admin" fullPage="true"><Admin /></Tab>
-      <Tab name="Logout"><input @click="authStore.logout()" type="submit" /></Tab>
+      <Tab name="Таблиці" fullPage="true"><Admin /></Tab>
+      <Tab name="Вихід"><input @click="authStore.logout()" type="submit" value="Підтвердити" /></Tab>
       <Tab v-if="actionPanel.show" :name="actionPanel.name" openByDefault="true">
         <ActionPanel />
       </Tab>

@@ -1,8 +1,8 @@
 <template>
-  <button ref="myBtn" @click="GetStatistic()" disabled>Update</button>
+  <button ref="myBtn" @click="GetStatistic()" disabled>Оновити</button>
 
   <select ref="mySelect" v-model="year" @change="GetStatistic()" disabled>
-    <option class="text-myBG" value="0">All Time</option>
+    <option class="text-myBG" value="0">За весь час</option>
     <option class="text-myBG" :value="y" v-for="y in years">{{ y }}</option>
   </select>
   <template v-if="isLoaded">
@@ -12,7 +12,7 @@
     <h1 class="p-3 font-bold">Кількість подій за типом:</h1>
     <myTable :headers="table3[0]" :body="table3[1]" />
   </template>
-  <template v-else>Loading...</template>
+  <template v-else>Завантаження...</template>
 
   <ReportCreation />
 </template>

@@ -1,12 +1,14 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
-
-async function GetData(tableName) {
+import { useNotify } from '@/stores/Notify'
+async function GetData(tableName, limit = 5, page = 1, order = 'id') {
     let authStore = useAuthStore()
     var data = await axios(`api/${tableName}`, {
+        params: { limit, page, order },
         headers: { 'token': authStore.userData.token }
     }).then((res) => {
-        return res.data
+        console.log(res)
+        return { data: res.data, maxPage: res.headers.maxpage, totalCount: res.headers.totaldata }
     }).catch((err) => {
         throw new Error(err.response.data || 'Server Error')
     })
@@ -43,12 +45,18 @@ async function EditTable(tableName, data) {
 
 async function DeleteData(tableName, data) {
     let authStore = useAuthStore()
+    if (!confirm(`Ви точно хочете видалити дані з таблиці ${tableName}?`)) {
+        console.log('a')
+        return null
+    }
     if (!authStore.isAuth) return 'NotAuth'
     let result = await axios.delete(`api/${tableName}/${data.id}`, {
         headers: { 'token': authStore.userData.token },
     }).then(res => {
+        useNotify().Open('Запис видалено.', 'success')
         return res.data
     }).catch((err) => {
+        console.log(err)
         throw new Error(err.response.data || 'Server Error')
     })
     return await result

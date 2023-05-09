@@ -91,7 +91,7 @@ namespace EmergencySituations.DataBase
 
         public static MyRequestResult Delete<T>(int id) where T : IDBTable
         {
-            var element = Select<T>().Where(i => i.Id == id).First();
+            var element = Select<T>($"SELECT * FROM {typeof(T).Name} WHERE id = {id}").First();
             string q = $"DELETE FROM [{typeof(T).Name}] WHERE [Id] = {id}";
             var result = ExecuteNonQuery(q);
             if (!result.isError && element != null)
@@ -169,6 +169,21 @@ namespace EmergencySituations.DataBase
                 sql.CreateCommand(q).Read().ForEach(l =>
                 {
                     a.Add(l.Select(i => $"{i.Value}").First());
+                });
+                return a;
+            }
+        }
+
+        public static List<int> GetYearList()
+        {
+            string q = $"SELECT DISTINCT strftime('%Y', DateAndTime) FROM Emergency";
+            using (var sql = new DataBaseConnection())
+            {
+                var a = new List<int>();
+                sql.CreateCommand(q).Read().ForEach(l =>
+                {
+                    var temp = l.Select(i => int.Parse($"{i.Value}")).First();                    
+                    a.Add(temp);
                 });
                 return a;
             }
