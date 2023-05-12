@@ -29,7 +29,7 @@ import { useActionPanel } from '@/stores/actionPanel'
       <Tab v-if="!authStore.isAuth" name="Авторизація"><Login /></Tab>
     </template>
     <template v-else>
-      <Tab name="Таблиці" fullPage="true"><Admin /></Tab>
+      <Tab name="Адмін панель" fullPage="true"><Admin /></Tab>
       <Tab name="Вихід"><input @click="authStore.logout()" type="submit" value="Підтвердити" /></Tab>
       <Tab v-if="actionPanel.show" :name="actionPanel.name" openByDefault="true">
         <ActionPanel />

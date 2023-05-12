@@ -20,12 +20,19 @@ namespace EmergencySituations.Controllers
         }
 
         [HttpGet("year")]
-        public ActionResult<string> GetYear()
+        public ActionResult<string> GetYear(int year = 0)
         {
+            if (year != 0)
+            {
+                var month = MyDataBase.GetMonthList(year);
+                month.Sort();
+                return Ok(month);
+            }
             var years = MyDataBase.GetYearList();
             years.Sort();
             return Ok(years);
         }
+
 
         public static IEnumerable<StatisticData> CalculateData(int year = 0)
         {

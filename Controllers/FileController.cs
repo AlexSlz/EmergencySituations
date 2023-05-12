@@ -14,6 +14,48 @@ namespace EmergencySituations.Controllers
         private static IWebHostEnvironment _environment { get; set; }
         public FileController(IWebHostEnvironment webHostEnvironment) { _environment = webHostEnvironment; }
 
+        [HttpGet("backup/create")]
+        [AuthFilter]
+        public ActionResult<string> CreateBackup()
+        {
+            var res = Backup.CreateBackup(_environment.WebRootPath);
+            if (res.isError)
+                return BadRequest(res.Message);
+            return Ok(res.Message);
+        }
+
+        [HttpGet("backup/list")]
+        [AuthFilter]
+        public ActionResult<string> GetBackupList()
+        {
+            return Ok(Backup.GetList(_environment.WebRootPath));
+        }
+
+        [HttpGet("backup/{fileName}")]
+        [AuthFilter]
+        public ActionResult<string> LoadBackup(string fileName)
+        {
+            if(fileName == "")
+                return BadRequest();
+            var res = Backup.LoadFile(_environment.WebRootPath, fileName);
+            if (res.isError)
+                return BadRequest(res.Message);
+            return Ok(res.Message);
+        }
+
+        [HttpGet("backup/{fileName}/delete")]
+        [AuthFilter]
+        public ActionResult<string> DeleteBackup(string fileName)
+        {
+            if (fileName == "")
+                return BadRequest();
+            var res = Backup.DeleteFile(_environment.WebRootPath, fileName);
+            if (res.isError)
+                return BadRequest(res.Message);
+            return Ok(res.Message);
+        }
+
+
         [HttpPost("{table}/{id}")]
         [AuthFilter]
         public ActionResult<string> UploadFile([FromForm] IFormFile file, string table, string id)
@@ -51,7 +93,7 @@ namespace EmergencySituations.Controllers
         }
 
         [HttpGet("report")]
-        //[AuthFilter]
+        [AuthFilter]
         public ActionResult<string> GetReport(int year, int month = 0)
         {
             if (!DateTime.TryParse(string.Format("1/1/{0}", year), out var dateTime))

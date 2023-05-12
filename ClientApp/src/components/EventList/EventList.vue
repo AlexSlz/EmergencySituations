@@ -5,6 +5,8 @@ import { useEmergencyStore } from '@/stores/emergency'
 import { useActionPanel } from '@/stores/actionPanel'
 import { useNotify } from '@/stores/Notify'
 import database from '@/main/database'
+import Search from './Search.vue'
+import { useSearch } from '@/stores/search'
 </script>
 
 <template>
@@ -19,8 +21,10 @@ import database from '@/main/database'
     </div>
     <template v-else>
       <button v-if="isAuth" @click="actionPanel.open()">Додати нову подію</button>
+      <Search :search="searchStore" ref="search" @onClear="loadEmergency" />
       <ItemList @click="emergency.select(item)" :data="item" v-for="(item, i) in emergency.list" />
       <h1 v-if="loading" class="text-center p-3">Завантаження...</h1>
+      <h1 v-if="emergency.list.length <= 0 && !loading" class="text-center p-3">Список порожній.</h1>
       <span class="flex">
         <template v-if="!loading">
           <input v-if="page != 1" @click="movePage(-page + 1)" value="<<-" type="button" />
@@ -46,23 +50,27 @@ export default {
       emergency: useEmergencyStore(),
       actionPanel: useActionPanel(),
       notify: useNotify(),
-
+      searchStore: useSearch(),
       page: 1,
       maxPage: 1,
-      limit: 50,
       loading: false,
     }
   },
   methods: {
     movePage(i) {
       this.page += i
-      this.loadEmergency()
+
+      if (this.searchStore.notEmpty) {
+        this.$refs.search.Find(this.page)
+      } else {
+        this.loadEmergency()
+      }
     },
     async loadEmergency() {
       this.emergency.list = []
       this.loading = true
       await database
-        .GetData('Emergency', this.limit, this.page, 'DateAndTime DESC')
+        .GetData('Emergency', this.page, 'DateAndTime DESC')
         .then((res) => {
           this.emergency.list = res.data
           this.maxPage = res.maxPage
@@ -92,43 +100,19 @@ export default {
     this.emergency.reLoad = this.loadEmergency
     this.loadEmergency()
   },
-}
-</script>
-
-<!-- <script>
-import { useAuthStore } from '@/stores/auth'
-import { useEmergencyStore } from '@/stores/emergency'
-import { useMenuStore } from '@/stores/editMenu'
-export default {
-  data() {
-    return {
-      itemsCount: 10,
-      itemsLimit: 5,
-      authStore: useAuthStore(),
-      emergencyStore: useEmergencyStore(),
-      editmenu: useMenuStore(),
-    }
-  },
-  mounted() {
-    var options = {
-      rootMargin: '0px',
-      threshold: 0.3,
-    }
-
-    var obs = new IntersectionObserver((e, o) => {
-      if (e[0].isIntersecting && this.emergencyStore.selectedElement == null) {
-        this.itemsCount += this.itemsLimit
-        if (this.itemsCount > this.emergencyStore.emergencyList.length) {
-          this.itemsCount = this.emergencyStore.emergencyList.length
+  watch: {
+    'searchStore.result.length': {
+      deep: true,
+      handler(val) {
+        if (val > 0) {
+          this.maxPage = this.searchStore.maxPage
+          this.emergency.list = this.searchStore.result
+        } else {
+          this.loadEmergency()
         }
-      }
-    }, options)
-    obs.observe(this.$refs.obs)
-  },
-  methods: {
-    getItems() {
-      return this.emergencyStore.emergencyList.filter((e, i) => i < this.itemsCount)
+      },
     },
   },
+  components: { Search },
 }
-</script> -->
+</script>

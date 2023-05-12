@@ -1,19 +1,36 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import { useNotify } from '@/stores/Notify'
-async function GetData(tableName, limit = 5, page = 1, order = 'id') {
+
+
+let limit = 35
+
+async function GetData(tableName, page = 1, order = 'id') {
     let authStore = useAuthStore()
     var data = await axios(`api/${tableName}`, {
         params: { limit, page, order },
         headers: { 'token': authStore.userData.token }
     }).then((res) => {
-        console.log(res)
         return { data: res.data, maxPage: res.headers.maxpage, totalCount: res.headers.totaldata }
     }).catch((err) => {
         throw new Error(err.response.data || 'Server Error')
     })
     return await data
 }
+
+async function Search(tableName, filter, page = 1, order = 'id') {
+    let authStore = useAuthStore()
+    var data = await axios.post(`api/${tableName}/search`, filter, {
+        params: { limit, page, order },
+        headers: { 'token': authStore.userData.token }
+    }).then((res) => {
+        return { data: res.data, maxPage: res.headers.maxpage, totalCount: res.headers.totaldata }
+    }).catch((err) => {
+        throw new Error(err.response.data || 'Server Error')
+    })
+    return await data
+}
+
 
 async function AddToTable(tableName, data) {
     let authStore = useAuthStore()
@@ -133,8 +150,12 @@ async function GetStatistic(year) {
     })
 }
 
-async function GetYears() {
-    return await axios('api/statistic/year').then((res) => {
+async function GetYears(year = 0) {
+    let params = {}
+    if (year > 0) {
+        params = { year }
+    }
+    return await axios('api/statistic/year', { params }).then((res) => {
         return res.data
     }).catch((err) => {
         throw new Error(err.response.data || 'Server Error')
@@ -150,10 +171,14 @@ async function GetTableNameList() {
 }
 
 async function CreateReport(year, month = 0) {
+    let authStore = useAuthStore()
     return await axios({
         url: `api/file/report?year=${year}&month=${month}`,
         method: 'GET',
         responseType: 'blob', // important
+        headers: {
+            'token': authStore.userData.token,
+        }
     }).then((res) => {
         const href = URL.createObjectURL(res.data);
         const link = document.createElement('a');
@@ -172,25 +197,56 @@ async function CreateReport(year, month = 0) {
     })
 }
 
-export default {
-    GetData, AddToTable, EditTable, DeleteData, GetToken, GetUserByToken, CheckUser, UploadFile, DeleteFiles,
-    GetStatistic, GetYears, GetTableNameList, CreateReport
+async function GetKeys(tableName) {
+    let authStore = useAuthStore()
+    const res = await axios(`api/${tableName}/getKeys`, {
+        headers: { 'token': authStore.userData.token }
+    })
+    return await res.data
+}
+
+async function GetBackUpList() {
+    let authStore = useAuthStore()
+    return await axios(`api/file/backup/list`, {
+        headers: { 'token': authStore.userData.token }
+    }).then((res) => {
+        return res.data
+    }).catch((err) => {
+        throw new Error(err.response.data || 'Server Error')
+    })
+}
+
+async function CreateBackup() {
+    let authStore = useAuthStore()
+    return await axios(`api/file/backup/create`, {
+        headers: { 'token': authStore.userData.token }
+    }).then((res) => {
+        return res.data
+    }).catch((err) => {
+        throw new Error(err.response.data || 'Server Error')
+    })
+}
+
+async function LoadFileBackup(name, delet) {
+    var del = (delet) ? '/delete' : ''
+    var msg = `Ви хочете завантажити файл ${name}? Усі незбережені дані будуть видалені.`
+    if (delet)
+        msg = `Ви точно хочете видалити файл ${name}?`
+    if (!confirm(msg)) {
+        return
+    }
+    let authStore = useAuthStore()
+    return await axios(`api/file/backup/${name}${del}`, {
+        headers: { 'token': authStore.userData.token }
+    }).then((res) => {
+        return res.data
+    }).catch((err) => {
+        throw new Error(err.response.data || 'Server Error')
+    })
 }
 
 
-// async function getKeys(tableName) {
-//     let authStore = useAuthStore()
-//     const res = await axios(`${apiName}/${tableName}/getKey`, {
-//         headers: { 'token': authStore.userData.token }
-//     })
-//     return await res.data
-// }
-
-// async function getTableNameList() {
-//     let authStore = useAuthStore()
-//     const res = await axios(`${apiName}/getTableNameList`, {
-//         headers: { 'token': authStore.userData.token }
-//     })
-//     return await res.data
-// }
-
+export default {
+    GetData, AddToTable, EditTable, DeleteData, GetToken, GetUserByToken, CheckUser, UploadFile, DeleteFiles,
+    GetStatistic, GetYears, GetTableNameList, CreateReport, Search, GetKeys, GetBackUpList, CreateBackup, LoadFileBackup
+}

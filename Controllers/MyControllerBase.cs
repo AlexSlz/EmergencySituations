@@ -22,7 +22,26 @@ namespace EmergencySituations.Controllers
             return Ok(MyDataBase.Select<T>(sql));
         }
 
+        [HttpPost("search")]
+        public ActionResult<string> Search(T data, int limit = 5, int page = 1, string order = "id")
+        {
+            int offset = (limit * page) - limit;
+            var filter = MyDataBase.GetSearchFilter(data);
+
+            string sql = $"SELECT * FROM [{typeof(T).Name}] WHERE {string.Join(" AND ", filter)} order by {order} limit {limit} offset {offset}";
+            var result = MyDataBase.Select<T>(sql);
+            if (result.Count <= 0)
+                return NotFound();
+
+            var totalCount = MyDataBase.Count<T>($"WHERE {string.Join(" AND ", filter)}");
+            Response.Headers.Add("totalData", $"{totalCount}");
+            decimal d = (decimal)((double)totalCount / (double)limit);
+            Response.Headers.Add("maxPage", $"{Math.Ceiling(d)}");
+            return Ok(result);
+        }
+
         [HttpGet("getKeys")]
+        [AuthFilter]
         public ActionResult<string> GetKeys()
         {
             return Ok(MyDataBase.GetTableKeys<T>());

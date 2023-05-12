@@ -47,7 +47,7 @@ export default {
         if (val != undefined) {
           database.GetData(this.tableName).then((i) => {
             this.itemsVisual = i.data.map((a) => a.name)
-            if (this.modelValue === undefined) this.$emit('update:modelValue', 1)
+            if (this.modelValue === undefined && !this.firstElement) this.$emit('update:modelValue', 1)
             if (this.firstElement) this.itemsVisual.unshift('')
           })
         }

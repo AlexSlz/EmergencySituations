@@ -34,8 +34,8 @@ export default {
     if (this.element.dateAndTime == undefined) this.element.dateAndTime = info.GetTime().replace(' ', 'T')
     if (this.element.positions == undefined) this.element.positions = []
     if (this.element.losses == undefined) this.element.losses = {}
-    this.element.type = { id: 1 }
-    this.element.level = { id: 1 }
+    if (this.element.type == undefined) this.element.type = { id: 1 }
+    if (this.element.level == undefined) this.element.level = { id: 1 }
   },
   components: { LossesTable },
 }

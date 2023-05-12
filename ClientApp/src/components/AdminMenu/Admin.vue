@@ -5,6 +5,14 @@
       <button ref="myBtn" @click="LoadTable(tableId)">Оновити</button>
     </span>
     <template v-if="!loading && !empty">
+      <Search
+        ref="search"
+        :keys="Object.keys(keys)"
+        :search="searchStore"
+        :tableName="tableNameList[tableId - 1]"
+        order="id"
+        :hideMenu="true"
+      />
       <button
         v-if="tableNameList[tableId - 1] != 'Positions' && tableNameList[tableId - 1] != 'Losses'"
         @click="actionPanel.open({ tableName: tableNameList[tableId - 1] })"
@@ -29,11 +37,16 @@
     <h1 v-if="loading">Завантаження...</h1>
     <h1 v-if="empty">{{ message }}</h1>
   </div>
+  <h1 class="p-3">Резервне копіювання БД</h1>
+  <Backup />
 </template>
 <script>
 import { useActionPanel } from '@/stores/actionPanel'
 import { useNotify } from '@/stores/Notify'
 import database from '@/main/database.js'
+import Search from '@/components/EventList/Search.vue'
+import { useSearch } from '@/stores/search'
+import Backup from './Backup.vue'
 export default {
   data() {
     return {
@@ -45,10 +58,12 @@ export default {
       link: [],
       actionPanel: useActionPanel(),
       notify: useNotify(),
+      searchStore: useSearch(),
       loading: true,
       disableSelect: true,
       empty: false,
       message: 'Таблиця порожня.',
+      keys: [],
     }
   },
   methods: {
@@ -62,7 +77,11 @@ export default {
     },
     SelectPage(p) {
       this.page = p
-      this.LoadTable(this.tableId)
+      if (this.searchStore.notEmpty) {
+        this.$refs.search.Find(this.page)
+      } else {
+        this.LoadTable(this.tableId)
+      }
     },
     LoadTable(id) {
       this.loading = true
@@ -70,7 +89,7 @@ export default {
       this.disableSelect = true
       this.tableId = id
       database
-        .GetData(this.tableNameList[id - 1], 30, this.page)
+        .GetData(this.tableNameList[id - 1], this.page)
         .then((res) => {
           this.empty = false
           if (res.data.length <= 0) {
@@ -80,6 +99,9 @@ export default {
           this.maxPage = res.maxPage
           this.table[0] = Object.keys(res.data[0]).concat('Дії')
           this.table[1] = Object.values(res.data)
+          database.GetKeys(this.tableNameList[id - 1]).then((keys) => {
+            this.keys = keys
+          })
         })
         .then(() => {
           this.loading = false
@@ -112,6 +134,21 @@ export default {
         this.LoadTable(this.tableId)
       })
   },
+  watch: {
+    'searchStore.result.length': {
+      deep: true,
+      handler(val) {
+        if (val > 0) {
+          this.maxPage = this.searchStore.maxPage
+          this.table[0] = Object.keys(this.searchStore.result[0]).concat('Дії')
+          this.table[1] = Object.values(this.searchStore.result)
+        } else {
+          this.LoadTable(this.tableId)
+        }
+      },
+    },
+  },
+  components: { Search, Backup },
 }
 </script>
 <style></style>

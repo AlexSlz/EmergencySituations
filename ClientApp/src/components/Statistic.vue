@@ -14,13 +14,14 @@
   </template>
   <template v-else>Завантаження...</template>
 
-  <ReportCreation />
+  <ReportCreation v-if="auth.isAuth" :years="years" />
 </template>
 
 <script>
 import database from '@/main/database'
 import { useNotify } from '@/stores/Notify'
 import ReportCreation from './ReportCreation.vue'
+import { useAuthStore } from '@/stores/auth'
 export default {
   data() {
     return {
@@ -31,6 +32,7 @@ export default {
       table2: [[], []],
       table3: [[], []],
       notify: useNotify(),
+      auth: useAuthStore(),
     }
   },
   methods: {
@@ -75,7 +77,9 @@ export default {
   },
   mounted() {
     this.GetStatistic()
-    database.GetYears().then((i) => (this.years = i))
+    database.GetYears().then((i) => {
+      this.years = i
+    })
   },
   components: { ReportCreation },
 }

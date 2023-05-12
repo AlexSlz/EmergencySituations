@@ -12,8 +12,10 @@ namespace EmergencySituations.DataBase
     {
         private static string sqlConfig;
         public static string SqlConfig => sqlConfig;
+        public static string MyDBFile { get; private set; }
         public static void Setup(string databasePath)
         {
+            MyDBFile = databasePath.Split("=")[1];
             sqlConfig = databasePath + ";foreign keys=true";
             ExecuteNonQuery(Users.Sql);
             if (Count<Users>() <= 0)
@@ -134,6 +136,49 @@ namespace EmergencySituations.DataBase
             }
         }
 
+        public static List<string> GetSearchFilter<T>(T data) where T : IDBTable
+        {
+
+            List<string> filter = new List<string>();
+            
+            data.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public).ToList().ForEach(i =>
+            {
+           
+                var value = i.GetValue(data, null);
+                var key = (RelationKey)i.GetCustomAttribute(typeof(RelationKey));
+                if (value != null)
+                {
+                    if (key != null)
+                    {
+                        filter.Add($"{i.Name} = '{value.GetType().GetProperty("Id").GetValue(value)}'");
+                    }
+                    else if (i.PropertyType.Name == "Int32" && int.TryParse(value.ToString(), out int intValue))
+                    {
+                        if (intValue > 0)
+                        {
+                            filter.Add($"{i.Name} = {value}");
+                        }
+                    }
+                    else if (DateTime.TryParse(value.ToString(), out DateTime date))
+                    {
+                        if(date > DateTime.MinValue)
+                        {
+                            filter.Add($"strftime('%Y-%m-%d', {i.Name}) LIKE '{date.ToString("yyyy-MM-dd")}'");
+                        }
+                    }
+                    else
+                    {
+                        filter.Add($"{i.Name} LIKE '%{value}%'");
+                    }
+
+
+                }
+
+            });
+
+            return filter;
+        }
+
         public static dynamic SelectTable(Type T, string q = "")
         {
             var method = typeof(MyDataBase).GetMethod(nameof(MyDataBase.Select));
@@ -141,9 +186,9 @@ namespace EmergencySituations.DataBase
             return genericMethod.Invoke(null, new string[] { q });
         }
 
-        public static int Count<T>() where T : IDBTable
+        public static int Count<T>(string where = "") where T : IDBTable
         {
-            string q = $"SELECT COUNT(*) FROM {typeof(T).Name}";
+            string q = $"SELECT COUNT(*) FROM {typeof(T).Name} {where}";
             using (var sql = new DataBaseConnection())
             {
                 return Convert.ToInt32(sql.CreateCommand(q).ExecuteScalar());
@@ -189,6 +234,21 @@ namespace EmergencySituations.DataBase
             }
         }
 
+        public static List<int> GetMonthList(int year)
+        {
+            string q = $"SELECT DISTINCT strftime('%m', DateAndTime) FROM Emergency WHERE strftime('%Y', DateAndTime) = '{year}'";
+            using (var sql = new DataBaseConnection())
+            {
+                var a = new List<int>();
+                sql.CreateCommand(q).Read().ForEach(l =>
+                {
+                    var temp = l.Select(i => int.Parse($"{i.Value}")).First();
+                    a.Add(temp);
+                });
+                return a;
+            }
+        }
+
         public static int GetLastId(string tableName)
         {
             string q = $"SELECT MAX(id) FROM  [{tableName}]";
@@ -200,7 +260,11 @@ namespace EmergencySituations.DataBase
 
         public static Dictionary<string, string> GetTableKeys<T>()
         {
-            return typeof(T).GetProperties().Where(i => i.Name != "Sql").ToDictionary(t => t.Name, t => t.PropertyType.Name);
+            if (typeof(T).Name == "Losses")
+                return new Dictionary<string, string>() { { "Id", "Int32" } };
+            return typeof(T).GetProperties().Where(i => 
+                    i.Name != "Sql" && (i.PropertyType.Name == "String" || i.PropertyType.Name == "Int32")
+                    ).ToDictionary(t => t.Name, t => t.PropertyType.Name);
         }
 
     }
