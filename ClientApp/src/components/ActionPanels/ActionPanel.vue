@@ -9,8 +9,8 @@
   <UsersTable v-if="actionPanel.tableName == 'Users'" :element="actionPanel.selected" />
   <h1 v-if="loading">Завантаження...</h1>
   <template v-else>
-    <button @click="confirm">Ok</button>
-    <button @click="actionPanel.show = false">Cancel</button>
+    <button @click="confirm">Підтвердити</button>
+    <button @click="actionPanel.show = false">Скасувати</button>
   </template>
 </template>
 <script>

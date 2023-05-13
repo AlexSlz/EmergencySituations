@@ -2,7 +2,7 @@
   <div class="p-2">
     <span class="flex">
       <my-combo :disabled="disableSelect" v-model="tableId" :items="tableNameList" @onChange="LoadTable"></my-combo>
-      <button ref="myBtn" @click="LoadTable(tableId)">Оновити</button>
+      <button ref="myBtn" @click="LoadTable(tableId, false)">Оновити</button>
     </span>
     <template v-if="!loading && !empty">
       <Search
@@ -10,8 +10,8 @@
         :keys="Object.keys(keys)"
         :search="searchStore"
         :tableName="tableNameList[tableId - 1]"
-        order="id"
         :hideMenu="true"
+        @onSortChange="LoadTable(tableId, false)"
       />
       <button
         v-if="tableNameList[tableId - 1] != 'Positions' && tableNameList[tableId - 1] != 'Losses'"
@@ -31,7 +31,7 @@
       </span>
       <myTable :addon="true" :headers="table[0]" :body="table[1]" @onLink="LoadTableById" v-slot="prop">
         <button @click="actionPanel.open({ tableName: tableNameList[tableId - 1], selected: prop.item })">Редагувати</button>
-        <button @click="DeleteData(prop.item)" class="bg-myRed">Delete</button>
+        <button @click="DeleteData(prop.item)" class="bg-myRed">Видалити</button>
       </myTable>
     </template>
     <h1 v-if="loading">Завантаження...</h1>
@@ -58,7 +58,7 @@ export default {
       link: [],
       actionPanel: useActionPanel(),
       notify: useNotify(),
-      searchStore: useSearch(),
+      searchStore: useSearch('Id'),
       loading: true,
       disableSelect: true,
       empty: false,
@@ -83,13 +83,14 @@ export default {
         this.LoadTable(this.tableId)
       }
     },
-    LoadTable(id) {
+    LoadTable(id, first = true) {
+      if (first) this.searchStore.order = 'Id'
       this.loading = true
       this.$refs.myBtn.disabled = true
       this.disableSelect = true
       this.tableId = id
       database
-        .GetData(this.tableNameList[id - 1], this.page)
+        .GetData(this.tableNameList[id - 1], this.page, this.searchStore.GetOrder())
         .then((res) => {
           this.empty = false
           if (res.data.length <= 0) {

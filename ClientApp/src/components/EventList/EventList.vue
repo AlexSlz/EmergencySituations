@@ -15,13 +15,13 @@ import { useSearch } from '@/stores/search'
       <input @click="emergency.select(null)" value="Назад" type="button" />
       <ItemInfo :element="emergency.selected" />
       <template v-if="isAuth && !loading">
-        <button @click="actionPanel.open({ selected: emergency.selected, tableName: 'Emergency' })">Edit</button>
-        <button class="bg-myRed" @click="DeleteData">Delete</button>
+        <button @click="actionPanel.open({ selected: emergency.selected, tableName: 'Emergency' })">Редагувати</button>
+        <button class="bg-myRed" @click="DeleteData">Видалити</button>
       </template>
     </div>
     <template v-else>
       <button v-if="isAuth" @click="actionPanel.open()">Додати нову подію</button>
-      <Search :search="searchStore" ref="search" @onClear="loadEmergency" />
+      <Search :search="searchStore" ref="search" @onSortChange="loadEmergency" />
       <ItemList @click="emergency.select(item)" :data="item" v-for="(item, i) in emergency.list" />
       <h1 v-if="loading" class="text-center p-3">Завантаження...</h1>
       <h1 v-if="emergency.list.length <= 0 && !loading" class="text-center p-3">Список порожній.</h1>
@@ -70,7 +70,7 @@ export default {
       this.emergency.list = []
       this.loading = true
       await database
-        .GetData('Emergency', this.page, 'DateAndTime DESC')
+        .GetData('Emergency', this.page, this.searchStore.GetOrder())
         .then((res) => {
           this.emergency.list = res.data
           this.maxPage = res.maxPage

@@ -1,5 +1,23 @@
 <template>
   <form class="p-2" @submit.prevent="search.notEmpty ? clear() : Find(1)">
+    <div class="flex items-center">
+      <h1 class="px-2">Сортувати за</h1>
+      <select @change="onSortChange" v-model="search.order" class="w-64" :disabled="loading || search.notEmpty">
+        <template v-if="!hideMenu">
+          <option value="DateAndTime">Датою</option>
+          <option value="name">Назвою</option>
+          <option value="level">Рівнем</option>
+          <option value="type">Типом</option>
+        </template>
+        <template v-else>
+          <option :value="key" v-for="key in keys">{{ key }}</option>
+        </template>
+      </select>
+      <select @change="onSortChange" v-model="search.type" class="w-12" :disabled="loading || search.notEmpty">
+        <option value="DESC">↓</option>
+        <option value="ASC">↑</option>
+      </select>
+    </div>
     <div class="flex">
       <my-combo
         @onChange="search.filter = {}"
@@ -57,9 +75,6 @@ export default {
     tableName: {
       default: 'Emergency',
     },
-    order: {
-      default: 'DateAndTime DESC',
-    },
     search: {
       required: true,
     },
@@ -74,6 +89,9 @@ export default {
     }
   },
   methods: {
+    onSortChange() {
+      this.$emit('onSortChange')
+    },
     GetMainKey() {
       var key = 'name'
       if (this.keys.length > 0) key = this.keys[this.keyValue - 1]
@@ -84,7 +102,7 @@ export default {
       if (!this.search.CheckFilter()) return
       this.loading = true
       database
-        .Search(this.tableName, this.search.filter, page, this.order)
+        .Search(this.tableName, this.search.filter, page, this.search.GetOrder())
         .then((res) => {
           this.search.notEmpty = true
           this.search.maxPage = res.maxPage
@@ -102,5 +120,6 @@ export default {
       this.temp = { level: { id: 0 }, type: { id: 0 } }
     },
   },
+  emits: ['onSortChange'],
 }
 </script>

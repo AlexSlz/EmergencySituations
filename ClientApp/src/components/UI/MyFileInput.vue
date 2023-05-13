@@ -15,7 +15,7 @@ export default {
   },
   data() {
     return {
-      btnMassage: 'Import',
+      btnMassage: 'Імпортувати',
       fileId: this.getRandomId(),
     }
   },
@@ -25,10 +25,10 @@ export default {
     },
     getFileName() {
       if (this.modelValue != undefined && this.modelValue != '') {
-        this.btnMassage = 'Clear'
-        return 'File'
+        this.btnMassage = 'Очистити'
+        return 'Файл'
       } else {
-        return 'Select File'
+        return 'Виберіть файл'
       }
     },
     onButtonClick() {
@@ -37,7 +37,7 @@ export default {
         myInput.type = 'text'
         myInput.type = 'file'
         this.$emit('update:modelValue', '')
-        this.btnMassage = 'Import'
+        this.btnMassage = 'Імпортувати'
         return
       }
       myInput.click()

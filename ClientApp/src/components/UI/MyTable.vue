@@ -20,7 +20,7 @@
             </p>
           </td>
           <!-- <td class="w-56"></td> -->
-          <td v-if="addon" class="w-64"><slot :item="item"></slot></td>
+          <td v-if="addon" class="w-72"><slot :item="item"></slot></td>
         </tr>
       </tbody>
     </table>

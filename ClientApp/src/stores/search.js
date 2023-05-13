@@ -1,11 +1,17 @@
 import { ref } from 'vue'
 
-export const useSearch = () => {
+export const useSearch = (startOrder = 'DateAndTime') => {
     const filter = ref({})
     const temp = ref({ level: { id: 0 }, type: { id: 0 } })
     const maxPage = ref(1)
     const notEmpty = ref(false)
     const result = ref([])
+    const order = ref(startOrder)
+    const type = ref('DESC')
+
+    const GetOrder = () => {
+        return `${order.value} ${type.value}`
+    }
 
     const CheckFilter = () => {
         Object.keys(temp.value).forEach((i) => {
@@ -28,5 +34,5 @@ export const useSearch = () => {
         notEmpty.value = false
     }
 
-    return { filter, temp, maxPage, result, notEmpty, CheckFilter, clear }
+    return { filter, temp, maxPage, result, notEmpty, order, type, GetOrder, CheckFilter, clear }
 }
