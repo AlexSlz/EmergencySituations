@@ -2,11 +2,11 @@
   <form @submit.prevent="auth()">
     <span class="flex items-center">
       <h1 class="px-2">Логін</h1>
-      <input type="text" placeholder="Login" v-model="login" />
+      <input type="text" placeholder="Введіть логін..." v-model="login" />
     </span>
     <span class="flex items-center">
       <h1 class="px-2">Пароль</h1>
-      <input type="password" placeholder="Password" v-model="pass" />
+      <input type="password" placeholder="Введіть пароль..." v-model="pass" />
     </span>
     <input type="submit" value="Підтвердити" />
   </form>

@@ -13,7 +13,6 @@
     <myTable :headers="table3[0]" :body="table3[1]" />
   </template>
   <template v-else>Завантаження...</template>
-
   <ReportCreation v-if="auth.isAuth" :years="years" />
 </template>
 

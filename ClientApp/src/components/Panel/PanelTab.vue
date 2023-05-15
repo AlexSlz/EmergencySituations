@@ -12,6 +12,7 @@ export default {
   data() {
     return {
       isActive: false,
+      activeFullPage: this.fullPage,
     }
   },
   created() {

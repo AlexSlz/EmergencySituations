@@ -16,7 +16,7 @@ namespace EmergencySituations.Controllers
             var user = MyDataBase.Select<Users>().FirstOrDefault(u => u.Login == req.Login && u.Password.ToString() == req.Password);
 
             if (user == null)
-                return BadRequest("User Not Found");
+                return BadRequest("Користувача не знайдено.");
             return Ok(Token.GenerateToken(user.Login).Key);
         }
         [HttpGet("{token}")]
@@ -24,7 +24,7 @@ namespace EmergencySituations.Controllers
         {
             var user = MyDataBase.Select<Users>().FirstOrDefault(u => u.Login == Token.GetOwner(token));
             if (user == null)
-                return BadRequest("User Not Found");
+                return BadRequest("Користувача не знайдено.");
             user.Password = "";
             return Ok(user);
         }

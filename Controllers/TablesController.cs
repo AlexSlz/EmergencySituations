@@ -15,12 +15,12 @@ namespace EmergencySituations.Controllers
         }
 
         [HttpGet("test")]
-        public ActionResult<string> Test(int c = 100)
+        public ActionResult<string> Test(int c = 100, int minYear = 2018)
         {
             Random r = new Random();
             for (int i = 0; i < c; i++)
             {
-                DateTime date = new DateTime(2018, 1, 1);
+                DateTime date = new DateTime(minYear, 1, 1);
                 int range = (DateTime.Today - date).Days;
                 date = date.AddDays(r.Next(range));
                 var temp = new Emergency()
@@ -33,7 +33,7 @@ namespace EmergencySituations.Controllers
                 };
                 MyDataBase.Insert(temp);
 
-                var t = new Positions() { EmergencyId = MyDataBase.GetLastId("Emergency"), X = r.Next(30, 60), Y = r.Next(0, 50) };
+                var t = new Positions() { EmergencyId = MyDataBase.GetLastId("Emergency"), X = r.Next(42, 52), Y = r.Next(20, 40) };
                 MyDataBase.Insert(t);
             }
 

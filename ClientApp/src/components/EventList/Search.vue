@@ -2,7 +2,7 @@
   <form class="p-2" @submit.prevent="search.notEmpty ? clear() : Find(1)">
     <div class="flex items-center">
       <h1 class="px-2">Сортувати за</h1>
-      <select @change="onSortChange" v-model="search.order" class="w-64" :disabled="loading || search.notEmpty">
+      <select @change="onSortChange" v-model="search.order" class="max-w-[16rem]" :disabled="loading || search.notEmpty">
         <template v-if="!hideMenu">
           <option value="DateAndTime">Датою</option>
           <option value="name">Назвою</option>

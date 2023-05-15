@@ -1,7 +1,10 @@
 <template>
   <div :class="{ fold: fold }" class="panel">
     <ul class="tabs">
-      <li v-for="tab in tabs" :class="{ active: tab.isActive, mobile: tab.onlyMobile, fullPage: tab.isActive && tab.fullPage }">
+      <li
+        v-for="tab in tabs"
+        :class="{ active: tab.isActive, mobile: tab.onlyMobile, fullPage: tab.isActive && tab.activeFullPage }"
+      >
         <a class="select-none" @click="selectTab(tab)">{{ tab.name }}</a>
       </li>
     </ul>
@@ -21,7 +24,7 @@ export default {
     }
   },
   created() {
-    this.tabs.push({ name: 'Map', fold: '', onlyMobile: true })
+    this.tabs.push({ name: 'Карта', fold: '', onlyMobile: true })
     this.nav.Select = this.selectTabById
   },
   methods: {

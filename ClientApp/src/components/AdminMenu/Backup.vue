@@ -14,7 +14,7 @@
         <button @click="Create()">Створити</button>
       </td>
       <td>
-        <select v-model="backUp" class="bg-mySecond" name="Cars" size="5">
+        <select v-model="backUp" class="bg-mySecond" size="5">
           <option :value="i" v-for="i in list">{{ i }}</option>
         </select>
       </td>
