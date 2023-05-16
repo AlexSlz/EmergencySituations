@@ -32,9 +32,8 @@ export default {
       preferCanvas: true,
       zoomControl: false,
       fadeAnimation: true,
-      //      markerZoomAnimation: false,
     }).setView([50.45, 30.53], 10)
-    L.tileLayer(`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${import.meta.env.VITE_MAP_API_KEY}`, {
+    L.tileLayer(`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=KGlk8BcVaYO801qx6JIK`, {
       tileSize: 512,
       zoomOffset: -1,
       minZoom: 3,
