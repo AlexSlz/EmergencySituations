@@ -140,5 +140,15 @@ namespace EmergencySituations.Controllers
             return Ok(fileToDelete);
         }
 
+        private  void CreateRootFolder(string root)
+        {
+            string path = Path.Combine(root);
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+        }
+
     }
 }

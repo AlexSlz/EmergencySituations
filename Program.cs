@@ -3,10 +3,7 @@ using EmergencySituations.DataBase;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    //options.JsonSerializerOptions.Converters.Add(new JsonDate());
-});
+builder.Services.AddControllers();
 
 MyDataBase.Setup(builder.Configuration.GetConnectionString("DataBaseFile"));
 
@@ -21,4 +18,3 @@ app.MapControllers();
 app.MapFallbackToFile("index.html"); ;
 
 app.Run();
-

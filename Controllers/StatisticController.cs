@@ -59,14 +59,15 @@ namespace EmergencySituations.Controllers
                 result.Type = getCount(current, types);
                 var loss = new Losses
                 {
-                    AffectedPerson = current.Select(i => i.Losses.AffectedPerson).Sum(),
-                    AffectedAnimals = current.Select(i => i.Losses.AffectedAnimals).Sum(),
+                    EasyAccident = current.Select(i => i.Losses.EasyAccident).Sum(),
+                    HardAccident = current.Select(i => i.Losses.HardAccident).Sum(),
+                    DeathPersonUnderSixty = current.Select(i => i.Losses.DeathPersonUnderSixty).Sum(),
+                    DeathPersonUndersSixteen = current.Select(i => i.Losses.DeathPersonUndersSixteen).Sum(),
+                    DisabilityPerson = current.Select(i => i.Losses.DisabilityPerson).Sum(),
 
-                    DamagedBuildings = current.Select(i => i.Losses.DamagedBuildings).Sum(),
                     DestroyedBuildings = current.Select(i => i.Losses.DestroyedBuildings).Sum(),
                     DamagedPersonalItems = current.Select(i => i.Losses.DamagedPersonalItems).Sum(),
-                    DestroyedPersonalItems = current.Select(i => i.Losses.DestroyedPersonalItems).Sum(),
-
+           
                     Costs = current.Select(i => i.Losses.Costs).Sum()
                 };
                 result.Losses = loss;

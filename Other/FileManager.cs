@@ -77,20 +77,18 @@ namespace EmergencySituations.Other
             AddText(doc, CreateText($"- Розташування: {CheckInfo(String.Join(',', emergency.Positions.Select(i => i.Location).Distinct()))}"));
 
             var e = emergency.Losses;
-            AddText(doc, CreateText($"- Збитки: {e.Costs}"));
+            AddText(doc, CreateText($"- Збитки: {e.Costs} (тис. гривень)"));
             AddText(doc, CreateText($"- Втрати:"));
             var b = new string[,] {
-                { "Кількість постраждалих осіб", "Кількість постраждалих тварин" },
-                { e.AffectedPerson.ToString(), e.AffectedAnimals.ToString() } 
+                { "Назва", "Кількість" },
+                { "Кількість осіб з втратою працездатності до 9 днів", e.EasyAccident.ToString() },
+                { "Кількість осіб з втратою працездатності понад 9 днів", e.HardAccident.ToString() },
+                { "Кількість осіб з отриманою інвалідністю", e.DisabilityPerson.ToString() },
+                { "Кількість загиблих до 16 років", e.DeathPersonUndersSixteen.ToString() },
+                { "Кількість загиблих від 16 до 60 років", e.DeathPersonUnderSixty.ToString() },
+                { "Збитки від пошкоджених або зруйнованих будівель", e.DestroyedBuildings.ToString() },
+                { "Збитки від пошкоджених або знищених особистих речей", e.DamagedPersonalItems.ToString() },
             };
-
-            InsertWordTable(doc, b);
-            AddText(doc, CreateText(""));
-            b = new string[,] {
-                { "Кількість пошкоджених будівель", "Кількість зруйнованих будівель", "Кількість пошкоджених особистих речей", "Кількість знищених особистих речей" },
-                { e.DamagedBuildings.ToString(), e.DestroyedBuildings.ToString(), e.DamagedPersonalItems.ToString(), e.DestroyedPersonalItems.ToString() }
-            };
-
             InsertWordTable(doc, b);
             AddText(doc, CreateText(""));
             e = null;

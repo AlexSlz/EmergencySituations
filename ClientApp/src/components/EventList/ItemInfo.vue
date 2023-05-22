@@ -49,12 +49,13 @@ export default {
       var temp = Object.values(this.element.losses)
       temp[0] = 0
       this.showTable = temp.reduce((a, b) => a + b) > 0
-      this.body.push(['Кількість постраждалих осіб', this.element.losses.affectedPerson])
-      this.body.push(['Кількість постраждалих тварин', this.element.losses.affectedAnimals])
-      this.body.push(['Кількість пошкоджених будівель', this.element.losses.damagedBuildings])
-      this.body.push(['Кількість зруйнованих будівель', this.element.losses.destroyedBuildings])
-      this.body.push(['Кількість пошкоджених особистих речей', this.element.losses.damagedPersonalItems])
-      this.body.push(['Кількість знищених особистих речей', this.element.losses.destroyedPersonalItems])
+      this.body.push(['Кількість осіб з втратою працездатності до 9 днів', this.element.losses.easyAccident])
+      this.body.push(['Кількість осіб з втратою працездатності понад 9 днів', this.element.losses.hardAccident])
+      this.body.push(['Кількість осіб з отриманою інвалідністю', this.element.losses.disabilityPerson])
+      this.body.push(['Кількість загиблих до 16 років', this.element.losses.deathPersonUndersSixteen])
+      this.body.push(['Кількість загиблих від 16 до 60 років', this.element.losses.deathPersonUnderSixty])
+      this.body.push(['Збитки від пошкоджених або зруйнованих будівель', this.element.losses.destroyedBuildings])
+      this.body.push(['Збитки від пошкоджених або знищених особистих речей', this.element.losses.damagedPersonalItems])
       this.body.push(['Збитки', this.element.losses.costs])
     },
   },
