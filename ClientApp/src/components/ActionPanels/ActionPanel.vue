@@ -11,7 +11,7 @@
     <h1 v-if="loading">Завантаження...</h1>
     <template v-else>
       <button type="submit" class="bg-myElement">Підтвердити</button>
-      <button type="cancel" @click="actionPanel.show = false">Скасувати</button>
+      <button @click.prevent="actionPanel.show = false">Скасувати</button>
     </template>
   </form>
 </template>
