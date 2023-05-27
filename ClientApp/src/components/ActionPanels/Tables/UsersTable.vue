@@ -6,9 +6,9 @@
   <h1>Електронна пошта</h1>
   <input v-model="element.email" type="text" />
   <h1>Логін</h1>
-  <input v-model="element.login" type="text" />
+  <input v-model="element.login" type="text" required />
   <h1>Пароль</h1>
-  <input v-model="element.password" type="text" />
+  <input v-model="element.password" type="text" required />
 </template>
 
 <script>

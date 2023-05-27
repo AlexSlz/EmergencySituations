@@ -1,17 +1,19 @@
 <template>
-  <EmergencyStatTable
-    v-if="actionPanel.tableName == 'EmergencyLevel' || actionPanel.tableName == 'EmergencyType'"
-    :element="actionPanel.selected"
-  />
-  <LossesTable v-if="actionPanel.tableName == 'Losses'" :element="actionPanel.selected" />
-  <EmergencyTable v-if="actionPanel.tableName == 'Emergency'" :element="actionPanel.selected" />
-  <PositionsTable v-if="actionPanel.tableName == 'Positions'" :element="actionPanel.selected" />
-  <UsersTable v-if="actionPanel.tableName == 'Users'" :element="actionPanel.selected" />
-  <h1 v-if="loading">Завантаження...</h1>
-  <template v-else>
-    <button @click="confirm">Підтвердити</button>
-    <button @click="actionPanel.show = false">Скасувати</button>
-  </template>
+  <form @submit.prevent="confirm">
+    <EmergencyStatTable
+      v-if="actionPanel.tableName == 'EmergencyLevel' || actionPanel.tableName == 'EmergencyType'"
+      :element="actionPanel.selected"
+    />
+    <LossesTable v-if="actionPanel.tableName == 'Losses'" :element="actionPanel.selected" />
+    <EmergencyTable v-if="actionPanel.tableName == 'Emergency'" :element="actionPanel.selected" />
+    <PositionsTable v-if="actionPanel.tableName == 'Positions'" :element="actionPanel.selected" />
+    <UsersTable v-if="actionPanel.tableName == 'Users'" :element="actionPanel.selected" />
+    <h1 v-if="loading">Завантаження...</h1>
+    <template v-else>
+      <button type="submit" class="bg-myElement">Підтвердити</button>
+      <button type="cancel" @click="actionPanel.show = false">Скасувати</button>
+    </template>
+  </form>
 </template>
 <script>
 import EmergencyTable from './Tables/EmergencyTable.vue'

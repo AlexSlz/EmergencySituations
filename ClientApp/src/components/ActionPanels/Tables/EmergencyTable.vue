@@ -1,6 +1,6 @@
 <template>
   <h1>Назва</h1>
-  <input v-model="element.name" />
+  <input v-model="element.name" required />
   <h1>Опис</h1>
   <textarea v-model="element.description"></textarea>
   <h1>Дата і час</h1>

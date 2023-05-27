@@ -10,9 +10,9 @@ function GetImage(id) {
 function GetTime(time = '') {
     var result = ''
     if (time == '') {
-        return new Date().toLocaleDateString('fr-CA') + ' ' + new Date().toLocaleTimeString('ua')
+        return new Date().toLocaleDateString('fr-CA') + ' ' + new Date().toLocaleTimeString('ua').replace(/(.*)\D\d+/, '$1')
     } else {
-        result = time.replace('T', ' ')
+        result = time.replace('T', ' ').replace(/(.*)\D\d+/, '$1')
     }
     var temp = result.split(' ', 2)
     if (temp[1] === '00:00:00') return temp[0]
