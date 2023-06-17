@@ -12,6 +12,8 @@
     <tr>
       <td>
         <button @click="Create()">Створити</button>
+        <input type="file" ref="input" accept=".db" class="hidden" @change="onFileImport" />
+        <button @click="AddFile()">Додати</button>
       </td>
       <td>
         <select v-model="backUp" class="bg-mySecond" size="5">
@@ -35,6 +37,26 @@ export default {
     }
   },
   methods: {
+    AddFile() {
+      var myInput = this.$refs.input
+      myInput.click()
+    },
+    onFileImport(event) {
+      let temp = event.target.files[0]
+      if (temp != null) {
+        database
+          .UploadBackUp(temp)
+          .then((res) => {
+            this.notify.Open(res, 'success')
+            setTimeout(() => {
+              location.reload()
+            }, 1000)
+          })
+          .catch((err) => {
+            this.notify.Open(err, 'error')
+          })
+      }
+    },
     Create() {
       database
         .CreateBackup()

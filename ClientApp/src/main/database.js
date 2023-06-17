@@ -127,6 +127,25 @@ async function UploadFile(tableName, file, id) {
     return await result
 }
 
+async function UploadBackUp(file) {
+    let authStore = useAuthStore()
+    if (!authStore.isAuth) return 'NotAuth'
+    let form = new FormData()
+    form.append('file', file)
+    let result = await axios.post(`api/file/backup`, form, {
+        headers: {
+            'token': authStore.userData.token,
+            'Content-Type': 'multipart/form-data'
+        }
+    }).then(res => {
+        return res.data
+    }).catch(e => {
+        throw new Error(e.response.data || 'Server Error')
+    })
+    return await result
+}
+
+
 async function DeleteFiles(tableName) {
     let authStore = useAuthStore()
     if (!authStore.isAuth) return 'NotAuth'
@@ -247,6 +266,6 @@ async function LoadFileBackup(name, delet) {
 
 
 export default {
-    GetData, AddToTable, EditTable, DeleteData, GetToken, GetUserByToken, CheckUser, UploadFile, DeleteFiles,
+    GetData, AddToTable, EditTable, DeleteData, GetToken, GetUserByToken, CheckUser, UploadFile, DeleteFiles, UploadBackUp,
     GetStatistic, GetYears, GetTableNameList, CreateReport, Search, GetKeys, GetBackUpList, CreateBackup, LoadFileBackup
 }

@@ -55,6 +55,24 @@ namespace EmergencySituations.Controllers
             return Ok(res.Message);
         }
 
+        [HttpPost("backup")]
+        //[AuthFilter]
+        public ActionResult<string> UploadBackup([FromForm] IFormFile file)
+        {
+            if (file == null)
+                return BadRequest("Need File.");
+            if (file.Length <= 0)
+                return BadRequest("File is to small.");
+            if (!Path.GetExtension(file.FileName).Contains(".db")){
+                return BadRequest("Bad File.");
+            }
+            var res = Backup.UploadFile(_environment.WebRootPath, file);
+            if (res.isError)
+            {
+                return BadRequest(res.Message);
+            }
+            return Ok(res.Message);
+        }
 
         [HttpPost("{table}/{id}")]
         [AuthFilter]
