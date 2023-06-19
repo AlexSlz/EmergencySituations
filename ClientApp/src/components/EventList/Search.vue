@@ -117,7 +117,6 @@ export default {
     clear() {
       this.page = 1
       this.search.clear()
-      this.temp = { level: { id: 0 }, type: { id: 0 } }
     },
   },
   emits: ['onSortChange'],

@@ -44,7 +44,7 @@ namespace EmergencySituations.Controllers.DBTables
 
                     difference.ForEach(e =>
                     {
-                        MyDataBase.Delete<Emergency>(e.Id);
+                        MyDataBase.Delete<Positions>(e.Id);
                         data.Positions.Remove(e);
                     });
                 }

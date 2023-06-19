@@ -18,7 +18,7 @@
 
   <h1>Збитки (тис. гривень)</h1>
   <input v-model="element.costs" type="number" />
-  <button @click="CalculateLoss">Підрахувати збитки</button>
+  <input @click="CalculateLoss" value="Підрахувати збитки" type="button" />
 </template>
 <script>
 export default {
@@ -39,6 +39,7 @@ export default {
         (this.element.deathPersonUnderSixty * 22 || 0) +
         (this.element.destroyedBuildings || 0) +
         (this.element.damagedPersonalItems || 0)
+      this.element.costs = Math.round(this.element.costs)
     },
   },
 }

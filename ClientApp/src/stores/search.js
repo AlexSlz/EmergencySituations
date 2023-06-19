@@ -18,6 +18,8 @@ export const useSearch = (startOrder = 'DateAndTime') => {
             if (temp.value[i].id != 0) filter.value[i] = temp.value[i]
         })
         Object.keys(filter.value).forEach((i) => {
+            if (filter.value[i].hasOwnProperty('id'))
+                if (filter.value[i].id == 0) delete filter.value[i]
             if (filter.value[i] == null || filter.value[i] == '') delete filter.value[i]
         })
         console.log(filter.value)

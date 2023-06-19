@@ -39,7 +39,9 @@ textarea {
 option {
   @apply text-myMain;
 }
-button {
+
+button,
+button[type='button'] {
   @apply px-4 py-2 m-2 font-semibold bg-myElement text-myText hover:bg-myActive rounded-md shadow-sm ease-in-out duration-700;
 }
 

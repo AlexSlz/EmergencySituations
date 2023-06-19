@@ -4,9 +4,9 @@
       <input v-model="item.name" />
       <p>{{ item.location }}</p>
       <p>{{ item.x.toFixed(3) }} | {{ item.y.toFixed(3) }}</p>
-      <button @click="RemoveItem(i)">Видалити</button>
+      <button @click="RemoveItem(i)" type="button">Видалити</button>
     </div>
-    <button @click="AddItem">Додати</button>
+    <button @click="AddItem" type="button">Додати</button>
   </div>
 </template>
 <script>

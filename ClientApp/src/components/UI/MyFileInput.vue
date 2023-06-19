@@ -1,6 +1,6 @@
 <template>
   <input type="file" ref="input" accept="image/png, image/gif, image/jpeg" class="hidden" @change="onFileImport" />
-  <button @click="onButtonClick">{{ btnMassage }}</button>
+  <button @click="onButtonClick" type="button">{{ btnMassage }}</button>
   <label>{{ getFileName() }}</label>
 </template>
 <script>

@@ -18,8 +18,8 @@ import { useNotify } from '@/stores/Notify'
 export default {
   data() {
     return {
-      login: 'Admin',
-      pass: '123',
+      login: '',
+      pass: '',
       authStore: useAuthStore(),
       notify: useNotify(),
     }
